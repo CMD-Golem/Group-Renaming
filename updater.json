@@ -1,0 +1,10 @@
+{
+	"version": "0.1.0",
+	"notes": "",
+	"platforms": {
+		"windows-x86_64": {
+			"signature": "",
+			"url": "https://github.com/CMD-Golem/Group-Renaming/releases/download/0.1.0/Group.Renaming_0.1.0_x64_en-US.msi"
+		}
+	}
+}
