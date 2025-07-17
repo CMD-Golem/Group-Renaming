@@ -1,35 +1,28 @@
 var dragging_clone;
 
-function dragInit() {
-	var dragable_elements = document.getElementsByTagName("file");
-	var drag_containers = document.getElementsByTagName("group");
+function dragStart(e) {
+	// create dragging clone
+	dragging_clone = e.currentTarget.cloneNode(true);
+	document.body.appendChild(dragging_clone);
+	e.dataTransfer.setDragImage(dragging_clone, 0, 0);
+	dragging_clone.classList.add("dragging_clone");
 
-	for (var i = 0; i < dragable_elements.length; i++) {
-		var dragable_element = dragable_elements[i];
-		dragable_element.draggable = true;
+	// make create group visible
+	document.getElementById("create_group").style.display = "flex";
 
-		dragable_element.addEventListener("dragstart", e => {
-			// create dragging clone
-			dragging_clone = e.currentTarget.cloneNode(true);
-			document.body.appendChild(dragging_clone);
-			e.dataTransfer.setDragImage(dragging_clone, 0, 0);
-			dragging_clone.classList.add("dragging_clone");
+	e.currentTarget.classList.add("dragging");
+}
 
-			// make create group visible
-			document.getElementById("create_group").style.display = "flex";
+function dragEnd(e) {
+	// clean up
+	dragging_clone.remove();
+	document.getElementById("create_group").style.display = "none";
+	e.currentTarget.classList.remove("dragging");
 
-			e.currentTarget.classList.add("dragging");
-		});
-
-		dragable_element.addEventListener("dragend", e => {
-			dragging_clone.remove();
-			document.getElementById("create_group").style.display = "none";
-			e.currentTarget.classList.remove("dragging");
-		});
-	}
-
-	for (var i = 0; i < drag_containers.length; i++) {
-		drag_containers[i].addEventListener("dragover", dragDrop);
+	// create new group if needed
+	if (e.currentTarget.parentElement.id == "create_group") {
+		var new_container = createGroup();
+		new_container.appendChild(e.currentTarget);
 	}
 }
 
@@ -115,5 +108,3 @@ function dragDrop(e) {
 		}
 	}
 }
-
-dragInit();

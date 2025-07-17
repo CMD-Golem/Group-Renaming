@@ -1,8 +1,14 @@
+:root {
+	--file-width: 100px;
+}
+
 body {
 	display: flex;
 	margin: 0;
 	user-select: none;
 	overflow: hidden;
+	font-family: sans-serif;
+	color: rgb(195, 195, 195);
 }
 
 aside {
@@ -17,39 +23,84 @@ aside {
 main {
 	display: flex;
 	flex-direction: column;
-	background-color: darkgray;
+	gap: 5px;
+	padding: 5px;
+	background-color: #191919;
 	width: calc(100% - 250px);
 	height: 100vh;
 }
 
+
+
+
+
+/* Groups */
 group {
 	display: flex;
 	flex-flow: row wrap;
 	gap: 5px;
 	padding: 5px;
-	border: 1px solid black;
-	min-height: 50px;
+	border: 1px solid rgba(195, 195, 195, 0.3);
+	border-radius: 5px;
+	min-height: 20px;
 }
 
+/* #create_group */
+
+#create_group::before {
+	content: "Create new Group";
+}
+
+
+/* Files */
 file {
-	background-color: white;
-	height: 50px;
-	width: 50px;
+	display: flex;
+	flex-direction: column;
+	align-content: flex-start;
+	width: var(--file-width);
+	padding: 5px;
+	border: 2px solid transparent;
+	border-radius: 5px;
 	cursor: move;
 	transition: transform 200ms ease;
 	will-change: transform;
 }
 
+file:hover, file.selected, file.dragging_clone {
+	background-color: rgba(195, 195, 195, 0.3);
+}
+file.selected {
+	border: 2px solid rgb(195, 195, 195);
+}
+
 file.dragging {
-	background-color: transparent;
-	height: 48px;
-	width: 48px;
-	border: 2px solid black;
-	color: transparent;
+	border: 2px solid rgb(195, 195, 195);
 	pointer-events: none;
+}
+file.dragging * {
+	visibility: hidden;
 }
 
 file.dragging_clone {
 	position: fixed;
 	top: -9999px;
+}
+
+file div {
+	display: flex;
+	align-items: flex-end;
+	aspect-ratio: 1 / 1;
+	width: 100%;
+}
+
+file img {
+	width: 100%;
+	max-height: 100%;
+	object-fit: contain;
+}
+
+file text {
+	padding-top: 5px;
+	text-align: center;
+	font-size: smaller;
 }
