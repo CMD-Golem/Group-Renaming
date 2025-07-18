@@ -51,12 +51,15 @@ group {
 	content: "Create new Group";
 }
 
+#default_group {
+	border-color: #60cdff;
+}
+
 
 /* Files */
 file {
 	display: flex;
 	flex-direction: column;
-	align-content: flex-start;
 	width: var(--file-width);
 	padding: 5px;
 	border: 2px solid transparent;
@@ -89,8 +92,9 @@ file.dragging_clone {
 file div {
 	display: flex;
 	align-items: flex-end;
-	aspect-ratio: 1 / 1;
+	flex: 1;
 	width: 100%;
+	max-height: calc(var(--file-width) - 10px);
 }
 
 file img {

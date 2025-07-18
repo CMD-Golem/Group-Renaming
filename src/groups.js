@@ -1,7 +1,7 @@
 var group_counter = 0;
 
 function groupInit(el) {
-	el.addEventListener("dragover", dragDrop);
+	el.addEventListener("dragover", dragOver);
 }
 
 function createGroup() {

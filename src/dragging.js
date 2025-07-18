@@ -1,4 +1,4 @@
-var dragging_clone;
+var dragging_clone, pointer_pos = {x:0, y:0}, animations = [], stop_all = false;
 
 function dragStart(e) {
 	// create dragging clone
@@ -24,10 +24,24 @@ function dragEnd(e) {
 		var new_container = createGroup();
 		new_container.appendChild(e.currentTarget);
 	}
+
+	// delete empty groups
+	var drag_containers = document.querySelectorAll("group:not(#create_group):not(#default_group)");
+	for (var i = 0; i < drag_containers.length; i++) {
+		if (drag_containers[i].children.length == 0) drag_containers[i].remove();
+	}
 }
 
-function dragDrop(e) {
+function dragOver(e) {
 	e.preventDefault();
+
+	// if (stop_all) return;
+
+	if (Math.abs(pointer_pos.x - e.clientX) > 20 || Math.abs(pointer_pos.y - e.clientY) > 20) {
+		pointer_pos.x = e.clientX;
+		pointer_pos.y = e.clientY;
+	}
+	else return;
 
 	var container = e.currentTarget;
 	var dragging = document.querySelector(".dragging");
@@ -51,16 +65,26 @@ function dragDrop(e) {
 		element_positions.set(not_dragging[i], bounding_rect);
 
 		// create new row if it doesnt exist yet
-		var existing_row = container_rows.find(row => row.y == vertical_center);
+		var existing_row = container_rows.find(row => Math.abs(row.y - vertical_center) < 5);
 
 		if (!existing_row) {
-			existing_row = {y:vertical_center, elements:[]};
+			existing_row = {y:vertical_center, elements:[], x:horizontal_position};
 			container_rows.push(existing_row);
 		}
 
 		// add info to row
 		existing_row.elements.push({el:not_dragging[i], x:horizontal_position});
 	}
+
+	// if (container_rows.length >= 3) {
+	// 	stop_all = true;
+	// 	for (var i = 0; i < animations.length; i++) {
+	// 		try {animations[i].pause();}
+	// 		catch (e) {}
+	// 	}
+	// } 
+
+	// console.log(container_rows);
 
 	// find closest row
 	var closest_row = undefined;
@@ -94,17 +118,17 @@ function dragDrop(e) {
 	else container.appendChild(dragging);
 
 	// animation
-	for (var i = 0; i < not_dragging.length; i++) {
-		var element = not_dragging[i];
+	// for (var i = 0; i < not_dragging.length; i++) {
+	// 	var element = not_dragging[i];
 
-		var old_position = element_positions.get(element);
-		var new_position = element.getBoundingClientRect();
+	// 	var old_position = element_positions.get(element);
+	// 	var new_position = element.getBoundingClientRect();
 
-		var dx = old_position.left - new_position.left;
-		var dy = old_position.top - new_position.top;
+	// 	var dx = old_position.left - new_position.left;
+	// 	var dy = old_position.top - new_position.top;
 
-		if (dx || dy) {
-			element.animate([{transform:`translate(${dx}px, ${dy}px)`}, {transform:"translate(0, 0)"}], {duration:200, easing:"ease-in-out"});
-		}
-	}
+	// 	if (dx || dy) {
+	// 		animations.push(element.animate([{transform:`translate(${dx}px, ${dy}px)`}, {transform:"translate(0, 0)"}], {duration:200, easing:"ease-in-out"}));
+	// 	}
+	// }
 }
