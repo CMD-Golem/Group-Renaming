@@ -1,5 +1,6 @@
 :root {
 	--file-width: 100px;
+	--dragging_amount: unset;
 }
 
 body {
@@ -7,12 +8,13 @@ body {
 	margin: 0;
 	user-select: none;
 	overflow: hidden;
+	overflow-y: auto;
 	font-family: sans-serif;
 	color: rgb(195, 195, 195);
 }
 
 aside {
-	position: relative;
+	position: fixed;
 	display: flex;
 	flex-direction: column;
 	background-color: black;
@@ -25,9 +27,10 @@ main {
 	flex-direction: column;
 	gap: 5px;
 	padding: 5px;
+	min-height: calc(100vh - 10px);
 	background-color: #191919;
 	width: calc(100% - 250px);
-	height: 100vh;
+	margin-left: 250px;
 }
 
 
@@ -45,19 +48,23 @@ group {
 	min-height: 20px;
 }
 
-/* #create_group */
-
-#create_group::before {
-	content: "Create new Group";
+#create_group, #default_group  {
+	min-height: 50px;
+	border-color: #60cdff;
 }
 
 #default_group {
+	border-color: transparent;
+}
+
+.selected_container {
 	border-color: #60cdff;
 }
 
 
 /* Files */
 file {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	width: var(--file-width);
@@ -69,10 +76,10 @@ file {
 	will-change: transform;
 }
 
-file:hover, file.selected, file.dragging_clone {
+main:not(.started_dragging) file:hover, file.selected_element, file.dragging_clone {
 	background-color: rgba(195, 195, 195, 0.3);
 }
-file.selected {
+file.selected_element {
 	border: 2px solid rgb(195, 195, 195);
 }
 
@@ -87,6 +94,16 @@ file.dragging * {
 file.dragging_clone {
 	position: fixed;
 	top: -9999px;
+}
+
+file span {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	background-color: #60cdff;
+	color: black;
+	padding: 5px;
+	border-radius: 2px;
 }
 
 file div {
