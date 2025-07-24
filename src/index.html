@@ -14,23 +14,26 @@
 <body>
 	<aside>
 		<div>
-			<label for="">Neuer Name</label>
-			<input type="text">
-			<label for="">Nummerierungszeichen (%enum%)</label>
-			<select name="" id="">
-				<option value="">123</option>
-				<option value="">ABC</option>
-				<option value="">abc</option>
+			<label for="new_name">Neuer Name <span>(%name%)</span></label>
+			<input type="text" id="new_name" autocomplete="one-time-code">
+			<label for="enumeration">Nummerierungszeichen <span>(%enum%)</span></label>
+			<select id="enumeration">
+				<option value="numerical">123</option>
+				<option value="big_letters">ABC</option>
+				<option value="small_letters">abc</option>
 			</select>
-			<label for="">Originaler Name beibehalten (%name%)</label>
-			<input type="checkbox" name="" id="">
-			<label for="">Vorschau grösse</label>
-			<input type="range" name="" id="">
-			<button>Konfiguration speichern</button>
-			<button>Ausgewählte Gruppe umbenennen</button>
-			<button>Alle Dateien umbenennen</button>
+			<!-- <label for="orignal_name"><input type="checkbox" id="orignal_name" autocomplete="one-time-code">Originaler Name beibehalten <span>(%name%)</span></label> -->
+			
+			<br>
+			<button onclick="renameGroup()">Ausgewählte Gruppe aktualisieren</button>
+			<button onclick="saveConfiguration()">Konfiguration speichern</button>
+			<button onclick="renameFiles()">Alle Dateien umbenennen</button>
+
+			<br>
+			<label for="preview_size">Vorschaugrösse</label>
+			<input type="range" id="preview_size" min="50" max="300" oninput="css_root.style.setProperty('--file-width', this.value + 'px');" onchange="window.localStorage.setItem('preview_size', this.value + 'px');">
 		</div>
-		<div style="display: none;">
+		<div>
 			<label>Neue Gruppe erstellen:</label>
 			<group id="create_group"></group>
 		</div>

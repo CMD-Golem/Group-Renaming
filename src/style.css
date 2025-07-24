@@ -1,6 +1,11 @@
 :root {
 	--file-width: 100px;
-	--dragging_amount: unset;
+	--border-radius: 5px;
+	--aside-color: black;
+	--main-color: #191919;
+	--select-color: rgb(195, 195, 195);
+	--select-color-opac: #4c4c4c;
+	--highlight-color: #60cdff;
 }
 
 body {
@@ -10,47 +15,37 @@ body {
 	overflow: hidden;
 	overflow-y: auto;
 	font-family: sans-serif;
-	color: rgb(195, 195, 195);
-}
-
-aside {
-	position: fixed;
-	display: flex;
-	flex-direction: column;
-	background-color: black;
-	height: 100vh;
-	width: 250px;
+	color: white;
+	user-select: none;
+	font-size: 14px;
 }
 
 main {
 	display: flex;
 	flex-direction: column;
-	gap: 5px;
-	padding: 5px;
+	gap: var(--border-radius);
+	padding: var(--border-radius);
 	min-height: calc(100vh - 10px);
-	background-color: #191919;
+	background-color: var(--main-color);
 	width: calc(100% - 250px);
 	margin-left: 250px;
+	font-size: 16px;
 }
-
-
-
-
 
 /* Groups */
 group {
 	display: flex;
 	flex-flow: row wrap;
-	gap: 5px;
-	padding: 5px;
-	border: 1px solid rgba(195, 195, 195, 0.3);
-	border-radius: 5px;
+	gap: var(--border-radius);
+	padding: var(--border-radius);
+	border: 1px solid var(--select-color-opac);
+	border-radius: var(--border-radius);
 	min-height: 20px;
 }
 
 #create_group, #default_group  {
 	min-height: 50px;
-	border-color: #60cdff;
+	border-color: var(--highlight-color);
 }
 
 #default_group {
@@ -58,7 +53,7 @@ group {
 }
 
 .selected_container {
-	border-color: #60cdff;
+	border-color: var(--highlight-color);
 }
 
 
@@ -68,23 +63,23 @@ file {
 	display: flex;
 	flex-direction: column;
 	width: var(--file-width);
-	padding: 5px;
+	padding: var(--border-radius);
 	border: 2px solid transparent;
-	border-radius: 5px;
+	border-radius: var(--border-radius);
 	cursor: move;
 	transition: transform 200ms ease;
 	will-change: transform;
 }
 
 main:not(.started_dragging) file:hover, file.selected_element, file.dragging_clone {
-	background-color: rgba(195, 195, 195, 0.3);
+	background-color: var(--select-color-opac);
 }
 file.selected_element {
-	border: 2px solid rgb(195, 195, 195);
+	border: 2px solid var(--select-color);
 }
 
 file.dragging {
-	border: 2px solid rgb(195, 195, 195);
+	border: 2px solid var(--select-color);
 	pointer-events: none;
 }
 file.dragging * {
@@ -100,9 +95,9 @@ file span {
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	background-color: #60cdff;
+	background-color: var(--highlight-color);
 	color: black;
-	padding: 5px;
+	padding: var(--border-radius);
 	border-radius: 2px;
 }
 
@@ -111,7 +106,7 @@ file div {
 	align-items: flex-end;
 	flex: 1;
 	width: 100%;
-	max-height: calc(var(--file-width) - 10px);
+	max-height: calc(var(--file-width) - 2 * var(--border-radius));
 }
 
 file img {
@@ -121,7 +116,83 @@ file img {
 }
 
 file text {
-	padding-top: 5px;
+	padding-top: var(--border-radius);
 	text-align: center;
 	font-size: smaller;
+}
+
+/* Aside */
+aside {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--aside-color);
+	height: 100vh;
+	width: 250px;
+}
+
+aside div {
+	width: calc(100% - 20px);
+	padding: 10px;
+}
+
+label {
+	display: inline-block;
+	padding: var(--border-radius);
+}
+label span {
+	font-size: small;
+}
+label:has(input[type=checkbox]) {
+	display: grid;
+	grid-template-columns: min-content auto;
+}
+
+input, button, select {
+	display: block;
+	background: var(--select-color-opac);
+	accent-color: var(--highlight-color);
+	padding: var(--border-radius);
+	border-radius: var(--border-radius);
+	color: inherit;
+	border: none;
+	width: 100%;
+	margin-bottom: 10px;
+}
+input {
+	width: calc(100% - 2 * var(--border-radius));
+}
+input[type=checkbox] {
+	display: inline-block;
+	grid-row: span 2;
+	width: unset;
+	margin: auto 0;
+	margin-right: 10px;
+}
+
+button:hover {
+	background-color: var(--select-color);
+	color: black;
+}
+
+/* option {
+	background: var(--select-color);
+} */
+
+*:focus {
+	outline: none;
+}
+
+aside div:has(group) {
+	display: none;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	border-top: 1px solid var(--select-color-opac);
+}
+
+aside div:has(group) label {
+	padding: 0;
+	padding-bottom: 10px;
+	padding-left: var(--border-radius);
 }

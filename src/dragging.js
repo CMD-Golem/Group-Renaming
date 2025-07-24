@@ -37,7 +37,7 @@ function dragStart(e) {
 				selected[i].remove();
 			}
 		}
-	}, 1, target, selected);
+	}, 0, target, selected);
 }
 
 function dragEnd(e) {
@@ -102,8 +102,6 @@ async function dragOver(e) {
 	var dragging = document.querySelector(".dragging");
 	var not_dragging = container.querySelectorAll("file:not(.dragging)");
 	var element_positions = new Map();
-
-	console.log(container)
 
 	// append directly if no other elements in container
 	if (not_dragging.length == 0) {
