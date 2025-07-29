@@ -32,7 +32,7 @@ pub fn run() {
 				folder_interaction::select_folder(app.handle().clone(), window);
 			}
 			else {
-				folder_interaction::load_folder(app.handle().clone(), window, &args[1]);
+				folder_interaction::load_folder(app.handle().clone(), &args[1]);
 			}
 
 			Ok(())

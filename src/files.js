@@ -45,3 +45,13 @@ function selectFile(e) {
 	if (last_selected != null) last_selected.classList.remove("last_selected_element");
 	e.currentTarget.classList.add("last_selected_element", "selected_element");
 }
+
+async function loadImageBlob() {
+	// This returns the Vec<u8> as Uint8Array
+	const array = await invoke<Uint8Array>('get_image_bytes');
+	const blob = new Blob([new Uint8Array(array)], { type: 'image/png' });
+	const url = URL.createObjectURL(blob);
+
+	const img = document.getElementById('my-img');
+	img.src = url;
+}
