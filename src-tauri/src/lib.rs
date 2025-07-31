@@ -8,8 +8,7 @@ mod folder_interaction;
 pub fn run() {
 	tauri::Builder::default()
 		.invoke_handler(tauri::generate_handler![
-			folder_interaction::select_folder,
-			folder_interaction::rename_files,
+			folder_interaction::select_folder
 		])
 		.plugin(tauri_plugin_updater::Builder::new().build())
 		.plugin(tauri_plugin_dialog::init())
@@ -28,6 +27,9 @@ pub fn run() {
 			// read folder for the first time
 			let window = app.get_webview_window("main").unwrap();
 			let args: Vec<String> = env::args().collect();
+
+			
+			
 			if args.len() <= 1 {
 				folder_interaction::select_folder(app.handle().clone(), window);
 			}

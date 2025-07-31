@@ -1,8 +1,8 @@
-use tauri::{AppHandle, WebviewWindow, Emitter};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 use tauri_plugin_dialog::DialogExt;
 use std::fs;
 use serde::Serialize;
-use mozjpeg::Decompress;
+// use mozjpeg::Decompress;
 
 
 #[tauri::command]
@@ -18,41 +18,45 @@ pub fn select_folder(app: AppHandle, window: WebviewWindow) {
 pub fn load_folder(app: AppHandle, dir: &str) {
 	let response = get_files(app.clone(), dir);
 	match response {
-		Ok(_) => app.emit("files", "{\"response\":\"finished\"}").unwrap(),
-		Err(err) => app.emit("files", format!("{{\"response\":\"error\", \"error\":\"{:?}\"}}", err)).unwrap(),
+		Ok(object) => app.emit("files", object).unwrap(),
+		Err(err) => app.emit("files", format!("{{\"status\":\"error\", \"error\":\"{:?}\"}}", err)).unwrap(),
 	}
 }
 
 const FILE_TYPES: [&str; 14] = ["apng", "avif", "bmp", "cur", "gif", "ico", "jfif", "jpeg", "jpg", "pjp", "pjpeg", "png", "svg", "webp"];
-const JPEG_TYPES: [&str; 5] = ["jfif", "jpeg", "jpg", "pjp", "pjpeg"];
+// const JPEG_TYPES: [&str; 5] = ["jfif", "jpeg", "jpg", "pjp", "pjpeg"];
 
-#[derive(Serialize)]
-pub struct ExportFolder<'a> {
+#[derive(Serialize, Clone)]
+pub struct ExportFolder {
 	response: &'static str,
-	name: &'a str,
-	data: Vec<u8>,
+	dir: String,
+	files: Vec<String>,
 }
 
-impl<'a> ExportFolder<'a> {
-	fn new(name: &'a str) -> Self {
+impl ExportFolder {
+	fn new(dir: &str) -> Self {
 		Self {
-			response: "streaming",
-			name: name,
-			data: Vec::new(),
+			response: "success",
+			dir: dir.to_string(),
+			files: Vec::new(),
 		}
 	}
 }
 
 #[tauri::command]
-pub fn get_files(app: AppHandle, dir: &str) -> Result<(), std::io::Error> {
-	app.emit("files", format!("{{\"response\":\"started\", \"path\":\"{:?}\"}}", dir.to_string())).unwrap();
+pub fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> {
+	let mut object = ExportFolder::new(dir);
 
+	// add folder to tauri scope
+	let _ = app.asset_protocol_scope().allow_directory(dir, false);
+
+	// send files to frontend
 	for entry in fs::read_dir(dir)? {
+		let path = entry?.path();
 
 		// check if file is an image
-		let path = entry?.path();
-		let extension = match path.extension().and_then(|os_str| os_str.to_str()) {
-			Some(ext) => ext,
+		let extension = match infer::get_from_path(path.clone())? {
+			Some(ext) => ext.extension(),
 			None => continue,
 		};
 
@@ -60,44 +64,39 @@ pub fn get_files(app: AppHandle, dir: &str) -> Result<(), std::io::Error> {
 
 		// get filename
 		let file_name = match path.file_name().and_then(|os_str| os_str.to_str()) {
-			Some(name) => name,
+			Some(name) => name.to_string(),
 			None => continue,
 		};
 
-		let mut object = ExportFolder::new(file_name);
+		object.files.push(file_name);
 
 		// handle jpegs
-		if JPEG_TYPES.contains(&extension) {
-			let data = std::fs::read(path)?;
-			let mut decomp = Decompress::new_mem(&jpeg_data)?;
+		// if JPEG_TYPES.contains(&extension) {
+		// 	let data = std::fs::read(path)?;
+		// 	let mut decomp = Decompress::new_mem(&jpeg_data)?;
 
-			decomp.set_scale(1, 4);
-			decomp.read_header()?;
-			decomp.start_decompress()?;
+		// 	decomp.set_scale(1, 4);
+		// 	decomp.read_header()?;
+		// 	decomp.start_decompress()?;
 
-			let width = decomp.width() as usize;
-			let height = decomp.height() as usize;
+		// 	let width = decomp.width() as usize;
+		// 	let height = decomp.height() as usize;
 
-			// Read RGB scanlines (Vec<[u8; 3]>)
-			let scanlines = decomp.read_scanlines::<[u8; 3]>()?;
+		// 	// Read RGB scanlines (Vec<[u8; 3]>)
+		// 	let scanlines = decomp.read_scanlines::<[u8; 3]>()?;
 			
-			// Flatten to a Vec<u8> (RGB packed)
-			let rgb_data = scanlines.concat().into_iter().flat_map(|rgb| rgb).collect();
+		// 	// Flatten to a Vec<u8> (RGB packed)
+		// 	let rgb_data = scanlines.concat().into_iter().flat_map(|rgb| rgb).collect();
 
-		}
+		// }
 
 		// get image
-
-
-
-
-		app.emit("files", "{\"response\":\"finished\"}").unwrap()
 	}
 
-	return Ok(());
+	return Ok(object);
 }
 
-#[tauri::command]
-pub fn rename_files(dir: &str) {
+// #[tauri::command]
+// pub fn rename_files(dir: &str) {
 	
-}
+// }

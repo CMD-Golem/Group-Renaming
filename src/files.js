@@ -55,3 +55,27 @@ async function loadImageBlob() {
 	const img = document.getElementById('my-img');
 	img.src = url;
 }
+
+function loadFiles(msg) {
+	console.log(msg);
+
+	var object = msg.payload;
+
+	if (object.status == "error") return print(object.error);
+	var path = "http://asset.localhost/" + object.dir.replace("%3A", ":").replaceAll("%5C", "/") + "/";
+
+	for (var i = 0; i < object.files.length; i++) {
+		var file_name = object.files[i];
+		var src = path + file_name;
+
+		// http://asset.localhost/C:/Users/Fabian/Desktop/Bilder%20-%20Kopie/DSC_0422.JPG
+		// http://asset.localhost/C%3A%5CUsers%5CFabian%5CDesktop%5CBilder%20-%20KopieDSC_0433.JPG
+
+		var element = document.createElement("file");
+		element.id = file_name;
+		element.innerHTML = `<div><img src="${src}"></div><text>${file_name}</text>`;
+		fileInit(element);
+
+		default_group.appendChild(element);
+	}
+}
