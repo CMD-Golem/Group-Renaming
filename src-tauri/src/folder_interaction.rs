@@ -2,8 +2,25 @@ use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 use tauri_plugin_dialog::DialogExt;
 use std::fs;
 use serde::Serialize;
-// use mozjpeg::Decompress;
 
+const FILE_TYPES: [&str; 14] = ["apng", "avif", "bmp", "cur", "gif", "ico", "jfif", "jpeg", "jpg", "pjp", "pjpeg", "png", "svg", "webp"];
+
+#[derive(Serialize, Clone)]
+pub struct ExportFolder {
+	response: &'static str,
+	dir: String,
+	files: Vec<String>,
+}
+
+impl ExportFolder {
+	fn new(dir: &str) -> Self {
+		Self {
+			response: "success",
+			dir: dir.to_string(),
+			files: Vec::new(),
+		}
+	}
+}
 
 #[tauri::command]
 pub fn select_folder(app: AppHandle, window: WebviewWindow) {
@@ -20,26 +37,6 @@ pub fn load_folder(app: AppHandle, dir: &str) {
 	match response {
 		Ok(object) => app.emit("files", object).unwrap(),
 		Err(err) => app.emit("files", format!("{{\"status\":\"error\", \"error\":\"{:?}\"}}", err)).unwrap(),
-	}
-}
-
-const FILE_TYPES: [&str; 14] = ["apng", "avif", "bmp", "cur", "gif", "ico", "jfif", "jpeg", "jpg", "pjp", "pjpeg", "png", "svg", "webp"];
-// const JPEG_TYPES: [&str; 5] = ["jfif", "jpeg", "jpg", "pjp", "pjpeg"];
-
-#[derive(Serialize, Clone)]
-pub struct ExportFolder {
-	response: &'static str,
-	dir: String,
-	files: Vec<String>,
-}
-
-impl ExportFolder {
-	fn new(dir: &str) -> Self {
-		Self {
-			response: "success",
-			dir: dir.to_string(),
-			files: Vec::new(),
-		}
 	}
 }
 
@@ -70,27 +67,7 @@ pub fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Err
 
 		object.files.push(file_name);
 
-		// handle jpegs
-		// if JPEG_TYPES.contains(&extension) {
-		// 	let data = std::fs::read(path)?;
-		// 	let mut decomp = Decompress::new_mem(&jpeg_data)?;
-
-		// 	decomp.set_scale(1, 4);
-		// 	decomp.read_header()?;
-		// 	decomp.start_decompress()?;
-
-		// 	let width = decomp.width() as usize;
-		// 	let height = decomp.height() as usize;
-
-		// 	// Read RGB scanlines (Vec<[u8; 3]>)
-		// 	let scanlines = decomp.read_scanlines::<[u8; 3]>()?;
-			
-		// 	// Flatten to a Vec<u8> (RGB packed)
-		// 	let rgb_data = scanlines.concat().into_iter().flat_map(|rgb| rgb).collect();
-
-		// }
-
-		// get image
+		// compress jpeg: mozjpeg .set_scale(1, 4);
 	}
 
 	return Ok(object);

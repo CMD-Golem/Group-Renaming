@@ -1,9 +1,5 @@
 function tauriInit() {
-	// init tauri
-	if (invoke == undefined) return;
 	t.event.listen("files", loadFiles);
-
-
 
 	// // ask before closing
 	// t.window.getCurrentWindow().onCloseRequested(async (event) => {

@@ -28,8 +28,6 @@ pub fn run() {
 			let window = app.get_webview_window("main").unwrap();
 			let args: Vec<String> = env::args().collect();
 
-			
-			
 			if args.len() <= 1 {
 				folder_interaction::select_folder(app.handle().clone(), window);
 			}

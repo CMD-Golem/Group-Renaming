@@ -9,15 +9,11 @@ const css_root = document.querySelector(":root");
 function globalInit() {
 	if (invoke != undefined) tauriInit();
 
-	var dragable_elements = document.getElementsByTagName("file");
 	var drag_containers = document.getElementsByTagName("group");
-
 	for (var i = 0; i < drag_containers.length; i++) groupInit(drag_containers[i]);
-	for (var i = 0; i < dragable_elements.length; i++) fileInit(dragable_elements[i]);
 
 	// preview size
 	var preview_size = window.localStorage.getItem("preview_size");
-	
 	if (preview_size == null) preview_size = 100;
 
 	document.getElementById("preview_size").value = preview_size;
