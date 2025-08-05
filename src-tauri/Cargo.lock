@@ -1299,6 +1299,7 @@ name = "group-renaming"
 version = "0.1.0"
 dependencies = [
  "infer",
+ "once_cell",
  "serde",
  "serde_json",
  "tauri",

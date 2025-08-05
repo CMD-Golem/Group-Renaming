@@ -6,7 +6,7 @@ use serde::Serialize;
 const FILE_TYPES: [&str; 14] = ["apng", "avif", "bmp", "cur", "gif", "ico", "jfif", "jpeg", "jpg", "pjp", "pjpeg", "png", "svg", "webp"];
 
 #[derive(Serialize, Clone)]
-pub struct ExportFolder {
+struct ExportFolder {
 	response: &'static str,
 	dir: String,
 	files: Vec<String>,
@@ -40,8 +40,7 @@ pub fn load_folder(app: AppHandle, dir: &str) {
 	}
 }
 
-#[tauri::command]
-pub fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> {
+fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> {
 	let mut object = ExportFolder::new(dir);
 
 	// add folder to tauri scope
@@ -72,8 +71,3 @@ pub fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Err
 
 	return Ok(object);
 }
-
-// #[tauri::command]
-// pub fn rename_files(dir: &str) {
-	
-// }

@@ -2,13 +2,16 @@ use tauri::Manager;
 use tauri_plugin_updater::UpdaterExt;
 use std::env;
 
-mod folder_interaction;
+mod get;
+mod rename;
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
 	tauri::Builder::default()
 		.invoke_handler(tauri::generate_handler![
-			folder_interaction::select_folder
+			get::select_folder,
+			rename::rename_files
 		])
 		.plugin(tauri_plugin_updater::Builder::new().build())
 		.plugin(tauri_plugin_dialog::init())
@@ -29,10 +32,10 @@ pub fn run() {
 			let args: Vec<String> = env::args().collect();
 
 			if args.len() <= 1 {
-				folder_interaction::select_folder(app.handle().clone(), window);
+				get::select_folder(app.handle().clone(), window);
 			}
 			else {
-				folder_interaction::load_folder(app.handle().clone(), &args[1]);
+				get::load_folder(app.handle().clone(), &args[1]);
 			}
 
 			Ok(())
