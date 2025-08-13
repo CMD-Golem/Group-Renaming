@@ -6,6 +6,8 @@
 	--select-color: rgb(195, 195, 195);
 	--select-color-opac: #4c4c4c;
 	--highlight-color: #60cdff;
+	--border-group: 2px;
+	--border-file: 2px;
 }
 
 body {
@@ -38,7 +40,7 @@ group {
 	flex-flow: row wrap;
 	gap: var(--border-radius);
 	padding: var(--border-radius);
-	border: 1px solid var(--select-color-opac);
+	border: var(--border-group) solid var(--select-color-opac);
 	border-radius: var(--border-radius);
 	min-height: 20px;
 }
@@ -64,7 +66,7 @@ file {
 	flex-direction: column;
 	width: var(--file-width);
 	padding: var(--border-radius);
-	border: 2px solid transparent;
+	border: var(--border-file) solid transparent;
 	border-radius: var(--border-radius);
 	cursor: move;
 	transition: transform 200ms ease;
@@ -75,11 +77,11 @@ main:not(.started_dragging) file:hover, file.selected_element, file.dragging_clo
 	background-color: var(--select-color-opac);
 }
 file.selected_element {
-	border: 2px solid var(--select-color);
+	border: var(--border-file) solid var(--select-color);
 }
 
 file.dragging {
-	border: 2px solid var(--select-color);
+	border: var(--border-file) solid var(--select-color);
 	pointer-events: none;
 }
 file.dragging * {
@@ -188,7 +190,7 @@ aside div:has(group) {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	border-top: 1px solid var(--select-color-opac);
+	border-top: var(--border-group) solid var(--select-color-opac);
 }
 
 aside div:has(group) label {

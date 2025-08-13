@@ -2,7 +2,7 @@ use tauri::{AppHandle, Manager};
 use serde::{Serialize, Deserialize};
 use std::fs;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct RenameFolder {
 	current: String,
 	new: String,
@@ -16,15 +16,15 @@ pub struct Response {
 
 #[derive(Serialize)]
 pub struct ResponseFolder {
-	status: &'static str,
-	current: &'static str,
-	new: &'static str
+	status: String,
+	current: String,
+	new: String
 }
 
 impl Response {
 	fn new() -> Self {
 		Self {
-			status: "had errors",
+			status: "success",
 			errors: Vec::new(),
 		}
 	}
@@ -33,24 +33,44 @@ impl Response {
 
 
 #[tauri::command]
-pub fn rename_files(app: AppHandle, dir: &str, files: Vec<RenameFolder>) -> Result<&str, std::io::Error> {
+pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> String {
 	if app.asset_protocol_scope().is_forbidden(dir) {
-		return Ok("{\"status\":\"Path is not allowed\"}");
+		return "{\"status\":\"error\", \"error\":\"Path is not allowed\"}".to_string();
 	}
 
+	// rename to temp file name and remove errors from renaming
 	let mut res = Response::new();
 
-	for file in files {
-		let renaming = fs::rename(file.current, file.new);
+	files.retain(|file| {
+		let renaming = fs::rename(&file.current, format!("~${}.tmp", file.current));
 		match renaming {
-			Ok(_) => println!("Renamed file"),
+			Ok(_) => true,
 			Err(e) => {
 				let error = e.to_string();
-				let response_folder = ResponseFolder {status:&error, current: &file.current, new: &file.new};
+				let response_folder = ResponseFolder {status:error, current: file.current.clone(), new: file.new.clone()};
+				res.errors.push(response_folder);
+				false
+			}
+		}
+	});
+	
+	println!("{:?}", files);
+
+	// rename to final name
+	for file in files {
+		let renaming = fs::rename(format!("~${}.tmp", file.current), &file.new);
+		match renaming {
+			Ok(_) => (),
+			Err(e) => {
+				let error = e.to_string();
+				let response_folder = ResponseFolder {status:error, current: file.current, new: file.new};
 				res.errors.push(response_folder);
 			}
 		}
 	}
 
-	return Ok("tes");
+	match serde_json::to_string(&res) {
+		Ok(json) => json,
+		Err(e) => format!("{{\"status\":\"error\", \"error\":\"{e}\"}}"),
+	}
 }

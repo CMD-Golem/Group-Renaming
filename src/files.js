@@ -62,3 +62,8 @@ function loadFiles(msg) {
 		default_group.appendChild(element);
 	}
 }
+
+function renameFiles() {
+
+	t.invoke("rename_files", )
+}
