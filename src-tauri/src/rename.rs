@@ -42,7 +42,15 @@ pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> 
 	let mut res = Response::new();
 
 	files.retain(|file| {
-		let renaming = fs::rename(&file.current, format!("~${}.tmp", file.current));
+		let current = format!("{}\\{}", dir, file.current);
+		let temp = format!("{}\\~${}.tmp", dir, file.current);
+
+
+		// check if file already exists
+		// let exists = fs::exists(temp);
+
+		// rename
+		let renaming = fs::rename(current, temp);
 		match renaming {
 			Ok(_) => true,
 			Err(e) => {
@@ -53,12 +61,10 @@ pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> 
 			}
 		}
 	});
-	
-	println!("{:?}", files);
 
 	// rename to final name
 	for file in files {
-		let renaming = fs::rename(format!("~${}.tmp", file.current), &file.new);
+		let renaming = fs::rename(format!("{}\\~${}.tmp", dir, file.current), format!("{}\\{}", dir, file.new));
 		match renaming {
 			Ok(_) => (),
 			Err(e) => {

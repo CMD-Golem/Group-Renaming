@@ -1,13 +1,34 @@
 const t = window.__TAURI__;
-const invoke = window.__TAURI__.core.invoke;
+const invoke = window.__TAURI__?.core.invoke;
 
-const main = document.querySelector("main");
-const create_group = document.getElementById("create_group");
-const default_group = document.getElementById("default_group");
 const css_root = document.querySelector(":root");
+const main = document.querySelector("main");
+const dialog = document.querySelector("dialog");
+const create_group = document.getElementById("create_group");
+var default_group = document.getElementById("default_group");
+var duplicate_wants_renaming = [];
+var file_path = undefined;
+
+const translations = {
+	duplicate_title: "Dateiname ist bereits in Verwendung",
+	duplicate_message: "Wähle das Bild aus, dass aus seiner Gruppe entfernt werden soll und wieder seinen originalen Namen erhalten soll.",
+	duplicate_standard: "Es befindet sich bereits eine Datei desselben Names an diesem Ort.<br>Geben Sie einen neuen Namen ein:",
+}
 
 function globalInit() {
-	if (invoke != undefined) tauriInit();
+	if (t != undefined) {
+		t.event.listen("files", loadFiles);
+
+		// // ask before closing
+		// t.window.getCurrentWindow().onCloseRequested(async (event) => {
+		// 	if (unsaved_campaign) {
+		// 		var user_action = await openDialog("unsaved_changes");
+		
+		// 		if (user_action == "dialog_yes") await saveCampaign();
+		// 		else if (user_action == "dialog_cancel") event.preventDefault();
+		// 	}
+		// });
+	};
 
 	var drag_containers = document.getElementsByTagName("group");
 	for (var i = 0; i < drag_containers.length; i++) groupInit(drag_containers[i]);
@@ -23,34 +44,7 @@ function globalInit() {
 globalInit();
 
 
-// general functions
-function openDialog(id, additional_info) {
-	return new Promise((resolve) => {
-		dialog.open = true;
-
-		active_error_dialog = error_msg.find(function(item) { return item.id == id; });
-
-		if (active_error_dialog.title != undefined) dialog.children[0].innerHTML = active_error_dialog.title;
-		else dialog.children[0].style.display = "none";
-
-		var msg = active_error_dialog.msg.replace("${additional_info}", additional_info);
-		dialog.children[1].innerHTML = msg;
-
-		for (var i = 0; i < active_error_dialog.buttons.length; i++) {
-			var button = document.getElementById(active_error_dialog.buttons[i]);
-			button.style.display = "inline-block";
-
-			button.addEventListener("click", (e) => {
-				resolve(e.target.id);
-
-				dialog.open = false;
-				dialog.children[0].style.display = "block";
-
-				var buttons = dialog.getElementsByTagName("button");
-				for (var i = 0; i < buttons.length; i++) {
-					buttons[i].style.display = "none";
-				}
-			});
-		}
-	});
+function clean_dialog() {
+	dialog.close();
+	dialog.innerHTML = "";
 }

@@ -8,7 +8,8 @@
 	<script defer src="dragging.js"></script>
 	<script defer src="groups.js"></script>
 	<script defer src="files.js"></script>
-	<script defer src="tauri.js"></script>
+	<script defer src="config.js"></script>
+	<script defer src="renaming.js"></script>
 
 	<script defer src="init.js"></script>
 </head>
@@ -30,7 +31,7 @@
 			<br>
 			<button onclick="renameGroup()">Ausgewählte Gruppe aktualisieren</button>
 			<button onclick="saveConfiguration()">Konfiguration speichern</button>
-			<button onclick="renameFiles()">Alle Dateien umbenennen</button>
+			<button onclick="applyFileNames()">Alle Dateien umbenennen</button>
 
 			<br>
 			<label for="preview_size">Vorschaugrösse</label>
@@ -44,5 +45,6 @@
 	<main>
 		<group id="default_group"></group>
 	</main>
+	<dialog closedby="none"></dialog>
 </body>
 </html>

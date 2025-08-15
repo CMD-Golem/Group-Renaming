@@ -30,34 +30,3 @@ function selectGroup(element) {
 	document.getElementById("new_name").value = element.getAttribute("data-new_name");
 	document.getElementById("enumeration").value = element.getAttribute("data-enumeration");
 }
-
-function renameGroup() {
-	var selected = document.querySelector(".selected_container");
-	var new_name = document.getElementById("new_name").value;
-	var enumeration = document.getElementById("enumeration").value;
-
-	selected.setAttribute("data-new_name", new_name);
-	selected.setAttribute("data-enumeration", enumeration);
-
-	if (enumeration == "numerical") var convertion = false;
-	else if (enumeration == "big_letters") var convertion = 65;
-	else if (enumeration == "small_letters") var convertion = 97;
-
-	var files = selected.getElementsByTagName("file");
-	
-	for (var i = 0; i < files.length; i++) {
-		if (convertion != false) {
-			var loop = i + 1;
-			var enum_char = "";
-			while (loop > 0) {
-				loop--;
-				enum_char = String.fromCharCode(convertion + (loop % 26)) + enum_char;
-				loop = Math.floor(loop / 26);
-			}
-		}
-		else var enum_char = i + 1;
-		
-		var current_name = files[i].getAttribute("data-original_name");
-		files[i].querySelector("text").innerHTML = new_name.replaceAll("%enum%", enum_char).replaceAll("%name%", current_name);
-	}
-}

@@ -46,24 +46,37 @@ function selectFile(e) {
 	e.currentTarget.classList.add("last_selected_element", "selected_element");
 }
 
+var file_counter = 0;
+
 function loadFiles(msg) {
 	var object = msg.payload;
+	file_path = object.dir;
 
+	// load defaul group
+	default_group = document.createElement("group");
+	default_group.id = "default_group";
+
+	main.innerHTML = "";
+	main.appendChild(default_group);
+
+	groupInit(default_group);
+
+	// load files
 	if (object.status == "error") return print(object.error);
-	var path = "http://asset.localhost/" + object.dir.replace("%3A", ":").replaceAll("%5C", "/") + "/";
+	var path = "http://asset.localhost/" + file_path + "\\";
 
 	for (var i = 0; i < object.files.length; i++) {
 		var file_name = object.files[i];
 		var element = document.createElement("file");
-		element.id = file_name;
+
+		element.setAttribute("data-original_name", file_name);
+		element.setAttribute("data-extension", file_name.split(".").pop());
+
+		element.id = "file_" + file_counter;
 		element.innerHTML = `<div><img src="${path + file_name}"></div><text>${file_name}</text>`;
+		file_counter++;
 		fileInit(element);
 
 		default_group.appendChild(element);
 	}
-}
-
-function renameFiles() {
-
-	t.invoke("rename_files", )
 }
