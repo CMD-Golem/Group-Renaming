@@ -55,8 +55,10 @@ function loadFiles(msg) {
 	// load defaul group
 	default_group = document.createElement("group");
 	default_group.id = "default_group";
+	default_group.setAttribute("data-new_name", translations.default_group);
 
 	main.innerHTML = "";
+	dragmap.innerHTML = "";
 	main.appendChild(default_group);
 
 	groupInit(default_group);
@@ -78,5 +80,16 @@ function loadFiles(msg) {
 		fileInit(element);
 
 		default_group.appendChild(element);
+		current_file_names.push({
+			id: element.id,
+			extension: file_name.split(".").pop(),
+			original: file_name,
+			raw_current: ":g",
+			current: file_name,
+			raw_requested: ":g",
+			requested: file_name,
+			group: "",
+			enumeration: ""
+		});
 	}
 }

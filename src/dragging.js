@@ -66,7 +66,11 @@ function dragEnd(e) {
 	// delete empty groups
 	var drag_containers = document.querySelectorAll("group:not(#create_group):not(#default_group)");
 	for (var i = 0; i < drag_containers.length; i++) {
-		if (drag_containers[i].children.length == 0) drag_containers[i].remove();
+		if (drag_containers[i].children.length == 0) {
+			var id = "bookmark_" + drag_containers[i].id;
+			document.getElementById(id).remove();
+			drag_containers[i].remove();
+		}
 	}
 
 	// insert selected elements again

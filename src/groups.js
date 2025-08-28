@@ -3,6 +3,16 @@ var group_counter = 0;
 function groupInit(el) {
 	el.addEventListener("dragover", dragOver);
 	el.addEventListener("click", (e) => selectGroup(e.currentTarget));
+
+	if (el.id == "create_group") return; // create group doesnt need a bookmark
+	var bookmark = document.createElement("button");
+	bookmark.innerHTML = el.getAttribute("data-new_name") || translations.new_group;
+	bookmark.id = "bookmark_" + el.id;
+	bookmark.addEventListener("click", () => el.scrollIntoView({block: "nearest", behavior: "smooth"}));
+	bookmark.addEventListener("dragover", () => el.scrollIntoView({block: "nearest", behavior: "smooth"}));
+
+	if (dragmap.children.length == 0) dragmap.appendChild(bookmark);
+	else dragmap.insertBefore(bookmark, dragmap.children[0]);
 }
 
 function createGroup() {
@@ -12,10 +22,10 @@ function createGroup() {
 	new_group.setAttribute("data-enumeration", "numerical");
 	groupInit(new_group);
 	selectGroup(new_group);
-	group_counter++;
 
 	main.insertBefore(new_group, main.children[0]);
 
+	group_counter++;
 	return new_group;
 }
 

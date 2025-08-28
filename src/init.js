@@ -5,14 +5,21 @@ const css_root = document.querySelector(":root");
 const main = document.querySelector("main");
 const dialog = document.querySelector("dialog");
 const create_group = document.getElementById("create_group");
-var default_group = document.getElementById("default_group");
+const dragmap = document.getElementById("dragmap");
+var default_group = undefined;
 var duplicate_wants_renaming = [];
 var file_path = undefined;
+var current_file_names = [];
 
 const translations = {
 	duplicate_title: "Dateiname ist bereits in Verwendung",
+	duplicate_1: "Wähle das Bild aus, das einen anderen Namen erhalten soll.",
+	duplicate_2: "Hier den neuen Namen eingeben. Wenn kein :g eingetragen ist, wird die Datei aus der Gruppe entfernt, sofern sie in einer ist.",
+	duplicate_3: "Neuer Name überprüfen",
 	duplicate_message: "Wähle das Bild aus, dass aus seiner Gruppe entfernt werden soll und wieder seinen originalen Namen erhalten soll.",
 	duplicate_standard: "Es befindet sich bereits eine Datei desselben Names an diesem Ort.<br>Geben Sie einen neuen Namen ein:",
+	new_group: "Neue Gruppe",
+	default_group: "Standard Ablage",
 }
 
 function globalInit() {
@@ -29,9 +36,7 @@ function globalInit() {
 		// 	}
 		// });
 	};
-
-	var drag_containers = document.getElementsByTagName("group");
-	for (var i = 0; i < drag_containers.length; i++) groupInit(drag_containers[i]);
+	groupInit(document.getElementById("create_group"));
 
 	// preview size
 	var preview_size = window.localStorage.getItem("preview_size");
