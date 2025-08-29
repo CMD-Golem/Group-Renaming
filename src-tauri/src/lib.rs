@@ -1,5 +1,6 @@
 use tauri::Manager;
 use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_prevent_default::Flags;
 use std::env;
 
 mod get;
@@ -17,6 +18,7 @@ pub fn run() {
 		.plugin(tauri_plugin_dialog::init())
 		.plugin(tauri_plugin_window_state::Builder::new().build())
 		.plugin(tauri_plugin_fs::init())
+		.plugin(prevent_default())
 		.setup(|app| {
 			// updater
 			let handle = app.handle().clone();
@@ -42,4 +44,16 @@ pub fn run() {
 		})
 		.run(tauri::generate_context!())
 		.expect("error while running tauri application");
+}
+
+#[cfg(debug_assertions)]
+fn prevent_default() -> tauri::plugin::TauriPlugin<tauri::Wry> {
+	tauri_plugin_prevent_default::Builder::new()
+		.with_flags(Flags::all().difference(Flags::DEV_TOOLS | Flags::RELOAD))
+		.build()
+}
+
+#[cfg(not(debug_assertions))]
+fn prevent_default() -> tauri::plugin::TauriPlugin<tauri::Wry> {
+	tauri_plugin_prevent_default::init()
 }

@@ -34,6 +34,40 @@ main {
 	font-size: 16px;
 }
 
+input, button, select {
+	display: block;
+	background: var(--select-color-opac);
+	accent-color: var(--highlight-color);
+	padding: var(--border-radius);
+	border-radius: var(--border-radius);
+	color: inherit;
+	border: none;
+	width: 100%;
+}
+input {
+	width: calc(100% - 2 * var(--border-radius));
+}
+input[type=checkbox] {
+	display: inline-block;
+	grid-row: span 2;
+	width: unset;
+	margin: auto 0;
+	margin-right: 10px;
+}
+
+button:hover {
+	background-color: var(--select-color);
+	color: black;
+}
+
+/* option {
+	background: var(--select-color);
+} */
+
+*:focus {
+	outline: none;
+}
+
 /* Groups */
 group {
 	display: flex;
@@ -117,10 +151,14 @@ file img {
 	object-fit: contain;
 }
 
-file text {
+file input {
+	padding: 0;
 	padding-top: var(--border-radius);
 	text-align: center;
 	font-size: smaller;
+	background: unset;
+	border: none;
+	width: 100%;
 }
 
 /* Aside */
@@ -151,39 +189,8 @@ label:has(input[type=checkbox]) {
 	grid-template-columns: min-content auto;
 }
 
-input, button, select {
-	display: block;
-	background: var(--select-color-opac);
-	accent-color: var(--highlight-color);
-	padding: var(--border-radius);
-	border-radius: var(--border-radius);
-	color: inherit;
-	border: none;
-	width: 100%;
+aside input, aside button, aside select {
 	margin-bottom: 10px;
-}
-input {
-	width: calc(100% - 2 * var(--border-radius));
-}
-input[type=checkbox] {
-	display: inline-block;
-	grid-row: span 2;
-	width: unset;
-	margin: auto 0;
-	margin-right: 10px;
-}
-
-button:hover {
-	background-color: var(--select-color);
-	color: black;
-}
-
-/* option {
-	background: var(--select-color);
-} */
-
-*:focus {
-	outline: none;
 }
 
 aside div:has(group) {
@@ -213,4 +220,39 @@ aside div:has(group) label {
 	#dragmap {
 		display: none;
 	}
+}
+
+/* Context menu */
+contextmenu {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	border-radius: 8px;
+	padding: 5px;
+	gap: 5px;
+	transform: scale(0);
+	transform-origin: top left;
+	background-color: var(--select-color-opac);
+	box-shadow: 0 0 15px 0 rgba(0,0,0,0.65);
+}
+
+contextmenu.visible {
+	transform: scale(1);
+	transition: transform 50ms ease-in-out;
+}
+
+contextmenu button {
+	background: unset;
+	border-radius: 3px;
+	text-align: left;
+}
+
+contextmenu button:first-child {
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+}
+
+contextmenu button:last-child {
+	border-bottom-left-radius: 3px;
+	border-bottom-right-radius: 3px;
 }

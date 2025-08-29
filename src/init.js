@@ -2,13 +2,15 @@ const t = window.__TAURI__;
 const invoke = window.__TAURI__?.core.invoke;
 
 const css_root = document.querySelector(":root");
+const body = document.querySelector("body");
 const main = document.querySelector("main");
 const dialog = document.querySelector("dialog");
+const context_menu = document.querySelector("contextmenu");
 const create_group = document.getElementById("create_group");
 const dragmap = document.getElementById("dragmap");
 var default_group = undefined;
-var duplicate_wants_renaming = [];
 var file_path = undefined;
+var contextmenu_selected = undefined;
 var current_file_names = [];
 
 const translations = {
@@ -44,6 +46,10 @@ function globalInit() {
 
 	document.getElementById("preview_size").value = preview_size;
 	css_root.style.setProperty('--file-width', preview_size);
+
+	body.addEventListener("click", () => {
+		context_menu.classList.remove("visible");
+	});
 }
 
 globalInit();
