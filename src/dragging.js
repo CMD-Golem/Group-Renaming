@@ -73,6 +73,10 @@ function dragEnd(e) {
 		}
 	}
 
+	// set default current_file_names
+	var in_default_group = target.parentElement.id == "default_group";
+	setDefaultNames(target, in_default_group);
+
 	// insert selected elements again
 	var elements = target.parentElement.querySelectorAll("file:not(.dragging)");
 	var element_positions = new Map();
@@ -83,12 +87,26 @@ function dragEnd(e) {
 	}
 	
 	for (var i = selected_elements_list.length -1; i >= 0; i--) {
-		selected_elements_list[i].classList.remove("selected_element");
-		target.parentElement.insertBefore(selected_elements_list[i], target.nextSibling);
+		var selected_element = selected_elements_list[i];
+		setDefaultNames(selected_element, in_default_group);
+		selected_element.classList.remove("selected_element");
+		target.parentElement.insertBefore(selected_element, target.nextSibling);
 	}
 
 	selected_elements_list = [];
 	animation(element_positions, elements);
+}
+
+function setDefaultNames(element, in_default_group) {
+	var file_obj = current_file_names[element.id.replace("file_", "")];
+	if (in_default_group) {
+		file_obj.enumeration = "";
+		file_obj.group = "";
+	}
+	else if (!file_obj.raw_current.includes(":g")) {
+		file_obj.raw_current = ":g";
+		file_obj.raw_requested = ":g";
+	}
 }
 
 async function dragOver(e) {

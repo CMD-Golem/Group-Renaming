@@ -4,8 +4,9 @@
 	--aside-color: black;
 	--main-color: #191919;
 	--select-color: rgb(195, 195, 195);
-	--select-color-opac: #4c4c4c;
-	--highlight-color: #60cdff;
+	--select-color-opac: rgba(195, 195, 195, 0.7); /* transparency 0.7 */
+	--select-color-opac-solid: #4c4c4c; /* transparency 0.3 */
+	--highlight-color: #22d86b;
 	--border-group: 2px;
 	--border-file: 2px;
 }
@@ -34,15 +35,21 @@ main {
 	font-size: 16px;
 }
 
+h1 {
+	margin: 0;
+	font-size: x-large;
+}
+
 input, button, select {
 	display: block;
-	background: var(--select-color-opac);
+	background: var(--select-color-opac-solid);
 	accent-color: var(--highlight-color);
 	padding: var(--border-radius);
 	border-radius: var(--border-radius);
 	color: inherit;
 	border: none;
 	width: 100%;
+	text-align: inherit;
 }
 input {
 	width: calc(100% - 2 * var(--border-radius));
@@ -69,12 +76,12 @@ button:hover {
 }
 
 /* Groups */
-group {
+group, dialog > div {
 	display: flex;
 	flex-flow: row wrap;
 	gap: var(--border-radius);
 	padding: var(--border-radius);
-	border: var(--border-group) solid var(--select-color-opac);
+	border: var(--border-group) solid var(--select-color-opac-solid);
 	border-radius: var(--border-radius);
 	min-height: 20px;
 }
@@ -107,8 +114,8 @@ file {
 	will-change: transform;
 }
 
-main:not(.started_dragging) file:hover, file.selected_element, file.dragging_clone {
-	background-color: var(--select-color-opac);
+main:not(.started_dragging) file:hover, dialog, file:hover, file.selected_element, file.dragging_clone {
+	background-color: var(--select-color-opac-solid);
 }
 file.selected_element {
 	border: var(--border-file) solid var(--select-color);
@@ -151,7 +158,7 @@ file img {
 	object-fit: contain;
 }
 
-file input {
+file text {
 	padding: 0;
 	padding-top: var(--border-radius);
 	text-align: center;
@@ -159,6 +166,7 @@ file input {
 	background: unset;
 	border: none;
 	width: 100%;
+	overflow-wrap: anywhere;
 }
 
 /* Aside */
@@ -189,7 +197,7 @@ label:has(input[type=checkbox]) {
 	grid-template-columns: min-content auto;
 }
 
-aside input, aside button, aside select {
+aside input, aside button, aside select, dialog input {
 	margin-bottom: 10px;
 }
 
@@ -198,7 +206,7 @@ aside div:has(group) {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	border-top: var(--border-group) solid var(--select-color-opac);
+	border-top: var(--border-group) solid var(--select-color-opac-solid);
 }
 
 aside div:has(group) label {
@@ -232,7 +240,7 @@ contextmenu {
 	gap: 5px;
 	transform: scale(0);
 	transform-origin: top left;
-	background-color: var(--select-color-opac);
+	background-color: var(--select-color-opac-solid);
 	box-shadow: 0 0 15px 0 rgba(0,0,0,0.65);
 }
 
@@ -255,4 +263,28 @@ contextmenu button:first-child {
 contextmenu button:last-child {
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
+}
+
+/* Dialog */
+dialog {
+	text-align: center;
+	color: inherit;
+	background-color: var(--main-color);
+	border: none;
+	border-radius: var(--border-radius);
+	padding: 25px 30px;
+	--file-width: 200px;
+}
+
+dialog::backdrop {
+	background-color: var(--select-color-opac);
+}
+
+dialog > div {
+	border: none;
+	justify-content: center;
+}
+
+dialog > input, dialog p {
+	margin: 14px 0;
 }

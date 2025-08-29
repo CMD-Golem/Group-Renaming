@@ -64,7 +64,7 @@ function loadFiles(msg) {
 		var element = document.createElement("file");
 		element.id = "file_" + file_counter;
 		element.draggable = true;
-		element.innerHTML = `<div><img src="${path + file_name}"></div><input disabled value="${file_name}">`;
+		element.innerHTML = `<div><img src="${path + file_name}"></div><text>${file_name}</text>`;
 		
 		element.addEventListener("dragstart", dragStart);
 		element.addEventListener("dragend", dragEnd);

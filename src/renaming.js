@@ -47,12 +47,16 @@ async function renameGroup() {
 }
 
 function startRenameManuall() {
-	var input = contextmenu_selected.querySelector("input");
+	var input = contextmenu_selected.querySelector("text");
 	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
-	input.value = file_obj.raw_current;
-	input.disabled = false;
+	input.innerHTML = file_obj.raw_current;
+	input.contentEditable = true;
 	input.focus();
-	input.select();
+
+	var sel = window.getSelection();
+	sel.removeAllRanges();
+	sel.selectAllChildren(input);
+
 	input.addEventListener("blur", renameManuall);
 	input.addEventListener("keydown", renameManuall);
 }
@@ -61,22 +65,20 @@ async function renameManuall(e) {
 	if (e.type == "blur" || (e.type == "keydown" && e.key == "Enter")) {
 		var needs_update = [];
 		var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
-
-		file_obj.raw_requested = e.target.value;
+		file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
 
 		parseName(file_obj);
 		await checkNewName(file_obj, needs_update);
 		for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
 	}
-	else if (e.type == "keydown" && e.key == "Escape") e.target.value = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
+	else if (e.type == "keydown" && e.key == "Escape") e.target.innerHTML = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
 	else return;
 
 	// disable editing
 	e.target.removeEventListener("blur", renameManuall);
 	e.target.removeEventListener("keydown", renameManuall);
 	e.target.blur();
-	setTimeout(() => { e.target.disabled = true; }, 100);
-	
+	e.target.contentEditable = false;
 }
 
 function parseName(file_obj) {
@@ -111,7 +113,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 			<p>${translations.duplicate_1}</p>
 			<div></div>
 			<p>${translations.duplicate_2}</p>
-			<input>
+			<input id="dialog_input">
 		`;
 
 		var selected_obj = undefined;
@@ -125,7 +127,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 
 			clone.addEventListener("click", (e) => {
 				dialog.querySelector(".selected_element")?.classList.remove("selected_element");
-				dialog.querySelector("input").value = file_obj.raw_requested;
+				document.getElementById("dialog_input").value = file_obj.raw_requested;
 				e.currentTarget.classList.add("selected_element");
 				selected_obj = file_obj;
 				keep_obj = other_obj;
@@ -141,7 +143,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 		var button = document.createElement("button");
 		button.innerHTML = translations.duplicate_3;
 		await button.addEventListener("click", async () => {
-			var raw_requested = dialog.querySelector("input").value;
+			var raw_requested = document.getElementById("dialog_input").value;
 			if (selected_obj == undefined || raw_requested == "") return;
 			selected_obj.raw_requested = raw_requested;
 
@@ -149,7 +151,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 			parseName(selected_obj);
 			await checkNewName(selected_obj, needs_update);
 			await checkNewName(keep_obj, needs_update);
-			resolve(response);
+			resolve();
 		});
 
 		dialog.appendChild(button);
@@ -158,8 +160,9 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 }
 
 function updateHtml(file_obj) {
-	var el_changed = document.getElementById(file_obj.id)
-	el_changed.querySelector("input").value = file_obj.current;
+	var el_changed = document.getElementById(file_obj.id);
+	console.log(file_obj.current);
+	el_changed.querySelector("text").innerHTML = file_obj.current;
 
 	// remove from group if it doesnt contain :g in name
 	if (el_changed.closest("group").id != "default_group" && !file_obj.raw_current.includes(":g")) {
@@ -175,12 +178,16 @@ async function applyFileNames() {
 
 	for (var i = 0; i < files.length; i++) {
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
-		if (file_obj.original.toUpperCase() != file_obj.current.toUpperCase()) files_array.push({current:file_obj.original, new:file_obj.current});
+		if (file_obj.original != file_obj.current) files_array.push({current:file_obj.original, new:file_obj.current});
 		file_obj.original = file_obj.current;
 	}
 
+	console.log(files_array)
+
+	if (files_array.length == 0) return;
+
 	var json = await invoke("rename_files", {dir:file_path, files:files_array});
-	var response = await json.json();
+	var response = await JSON.parse(json);
 	console.log(response)
 
 	// show error
@@ -192,9 +199,8 @@ async function applyFileNames() {
 
 	// reset orignal file name if error happend to it and display error message
 	for (var i = 0; i < response.errors.length; i++) {
-		var file_obj = current_file_names.find(obj => obj.original == response[i].new);
-		file_obj.original = response[i].current;
+		var error_files = response.errors[i];
+		var file_obj = current_file_names.find(obj => obj.original == error_files.new);
+		file_obj.original = error_files.current;
 	}
-	
-	console.log(response.errors);
 }

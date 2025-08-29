@@ -43,8 +43,10 @@ pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> 
 	files.retain(|file| {
 		let current = dir_path.join(&file.current);
 		let temp = dir_path.join(format!("~${}.tmp", file.current));
+		let new = dir_path.join(&file.new);
 
-		if file_exists(&temp, &mut res, &file) { return false; }
+		if !file_exists(&temp, &mut res, &file) { return false; }
+		if !file_exists(&new, &mut res, &file) { return false; }
 
 		match fs::rename(&current, &temp) {
 			Ok(_) => true,
@@ -57,7 +59,7 @@ pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> 
 		let temp = dir_path.join(format!("~${}.tmp", file.current));
 		let new = dir_path.join(&file.new);
 
-		if file_exists(&new, &mut res, &file) { continue; }
+		if !file_exists(&new, &mut res, &file) { continue; }
 
 		let _ = match fs::rename(&temp, &new) {
 			Ok(_) => true,

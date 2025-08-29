@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    group_renaming_lib::run();
+	group_renaming_lib::run();
 }
