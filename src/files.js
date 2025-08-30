@@ -1,3 +1,5 @@
+var file_counter = 0;
+
 function selectFile(e) {
 	var current_state = e.currentTarget.classList.contains("selected_element");
 
@@ -38,9 +40,8 @@ function selectFile(e) {
 	e.currentTarget.classList.add("last_selected_element", "selected_element");
 }
 
-var file_counter = 0;
-
 function loadFiles(msg) {
+	cleanUp();
 	var object = msg.payload;
 	file_path = object.dir;
 
@@ -49,10 +50,7 @@ function loadFiles(msg) {
 	default_group.id = "default_group";
 	default_group.setAttribute("data-new_name", translations.default_group);
 
-	main.innerHTML = "";
-	dragmap.innerHTML = "";
 	main.appendChild(default_group);
-
 	groupInit(default_group);
 
 	// load files
@@ -117,4 +115,29 @@ function contextMenu(event) {
 
 	// store selected file
 	contextmenu_selected = event.currentTarget;
+}
+
+function imageViewer() {
+	dialog.addEventListener("click", cleanDialog, {once:true});
+	dialog.innerHTML = `
+		<div class="zoomist-container">
+			<div class="zoomist-wrapper">
+				<div class="zoomist-image">
+					<img src="${contextmenu_selected.querySelector("img").src}">
+				</div>
+			</div>
+		</div>
+		<div class="zoomist-close">&#9587;</div>
+	`;
+	dialog.showModal();
+	
+	new Zoomist('.zoomist-container', {
+		zoomRatio: 0.3,
+		maxScale: 50,
+		smooth: true,
+		slider: false,
+		zoomer: false,
+		draggable: false,
+		pinchable: false,
+	});
 }

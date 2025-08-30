@@ -127,8 +127,13 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 
 			clone.addEventListener("click", (e) => {
 				dialog.querySelector(".selected_element")?.classList.remove("selected_element");
-				document.getElementById("dialog_input").value = file_obj.raw_requested;
 				e.currentTarget.classList.add("selected_element");
+
+				var input = document.getElementById("dialog_input");
+				input.value = file_obj.raw_requested;
+				input.focus();
+				input.select();
+
 				selected_obj = file_obj;
 				keep_obj = other_obj;
 			});
@@ -147,7 +152,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 			if (selected_obj == undefined || raw_requested == "") return;
 			selected_obj.raw_requested = raw_requested;
 
-			clean_dialog();
+			cleanDialog();
 			parseName(selected_obj);
 			await checkNewName(selected_obj, needs_update);
 			await checkNewName(keep_obj, needs_update);
@@ -161,7 +166,6 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 
 function updateHtml(file_obj) {
 	var el_changed = document.getElementById(file_obj.id);
-	console.log(file_obj.current);
 	el_changed.querySelector("text").innerHTML = file_obj.current;
 
 	// remove from group if it doesnt contain :g in name
@@ -182,8 +186,6 @@ async function applyFileNames() {
 		file_obj.original = file_obj.current;
 	}
 
-	console.log(files_array)
-
 	if (files_array.length == 0) return;
 
 	var json = await invoke("rename_files", {dir:file_path, files:files_array});
@@ -192,15 +194,35 @@ async function applyFileNames() {
 
 	// show error
 	if (response.status == "error") {
-		dialog.innerHTML = `<p>${response.error}</p><button onclick="clean_dialog()">Ok<button>`;
+		dialog.innerHTML = `<p>${response.error}</p><button onclick="cleanDialog()">Ok</button>`;
 		dialog.showModal();
 		return;
 	}
 
 	// reset orignal file name if error happend to it and display error message
+	var error_html = `<tr><th>${translations.error}</th><th>${translations.current_name}</th><th>${translations.new_name}</th></tr>`;
+
 	for (var i = 0; i < response.errors.length; i++) {
 		var error_files = response.errors[i];
+
+		// reset to old name
 		var file_obj = current_file_names.find(obj => obj.original == error_files.new);
 		file_obj.original = error_files.current;
+		file_obj.current = error_files.current;
+		file_obj.requested = error_files.current;
+		document.getElementById(file_obj.id).querySelector("text").innerHTML = error_files.current;
+
+		// error html
+		error_html += `<tr><td>${error_files.status}</td><td>${error_files.current}</td><td>${error_files.new}</td></tr>`;
 	}
+
+	// reset original file name
+	for (var i = 0; i < response.errors.length; i++) {
+
+	}
+
+	if (response.errors.length == 0) dialog.innerHTML = `<p>${translations.renaming_success}</p><button onclick="cleanDialog()">Ok</button>`;
+	else dialog.innerHTML = `<p>${translations.renaming_with_problems}</p><table>${error_html}</table><button onclick="cleanDialog()">Ok</button>`;
+
+	dialog.showModal();
 }

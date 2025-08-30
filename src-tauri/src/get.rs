@@ -51,7 +51,7 @@ fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> 
 		let path = entry?.path();
 
 		// check if file is an image
-		let extension = match infer::get_from_path(path.clone())? {
+		let extension = match infer::get_from_path(&path)? {
 			Some(ext) => ext.extension(),
 			None => continue,
 		};

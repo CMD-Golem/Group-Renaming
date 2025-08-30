@@ -5,6 +5,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="zoomist.css">
+	<script defer src="zoomist.umd.js"></script>
 	<script defer src="dragging.js"></script>
 	<script defer src="groups.js"></script>
 	<script defer src="files.js"></script>
@@ -53,7 +55,7 @@
 	<dialog closedby="none"></dialog>
 	<contextmenu>
 		<button onclick="startRenameManuall()">Umbenennen</button>
-		<button style="display: none;">Bild vergrössern</button>
+		<button onclick="imageViewer()">Bild vergrössern</button>
 	</contextmenu>
 </body>
 </html>

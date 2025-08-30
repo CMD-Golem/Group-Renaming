@@ -22,9 +22,29 @@ const translations = {
 	duplicate_standard: "Es befindet sich bereits eine Datei desselben Names an diesem Ort.<br>Geben Sie einen neuen Namen ein:",
 	new_group: "Neue Gruppe",
 	default_group: "Standard Ablage",
+	error: "Fehlermeldung",
+	current_name: "Dateiname",
+	new_name: "Angefordeter neuer Name",
+	renaming_success: "Alle Dateien wurden erfolgreich umbenannt",
+	renaming_with_problems: "Dateien wurden umbenannt<br>Folgende Dateien konnten nicht umbenannt werden:",
 }
 
 function globalInit() {
+	groupInit(document.getElementById("create_group"));
+	cleanUp();
+
+	// preview size
+	var preview_size = window.localStorage.getItem("preview_size");
+	if (preview_size == null) preview_size = 100;
+
+	document.getElementById("preview_size").value = preview_size;
+	css_root.style.setProperty('--file-width', preview_size);
+
+	body.addEventListener("click", () => {
+		context_menu.classList.remove("visible");
+	});
+
+	// tauri
 	if (t != undefined) {
 		t.event.listen("files", loadFiles);
 
@@ -38,24 +58,23 @@ function globalInit() {
 		// 	}
 		// });
 	};
-	groupInit(document.getElementById("create_group"));
+}
 
-	// preview size
-	var preview_size = window.localStorage.getItem("preview_size");
-	if (preview_size == null) preview_size = 100;
-
-	document.getElementById("preview_size").value = preview_size;
-	css_root.style.setProperty('--file-width', preview_size);
-
-	body.addEventListener("click", () => {
-		context_menu.classList.remove("visible");
-	});
+function cleanUp() {
+	main.innerHTML = "";
+	dragmap.innerHTML = "";
+	default_group = undefined;
+	file_path = undefined;
+	contextmenu_selected = undefined;
+	current_file_names = [];
+	group_counter = 0;
+	file_counter = 0;
 }
 
 globalInit();
 
 
-function clean_dialog() {
+function cleanDialog() {
 	dialog.close();
 	dialog.innerHTML = "";
 }
