@@ -8,8 +8,14 @@ function groupInit(el) {
 	var bookmark = document.createElement("button");
 	bookmark.innerHTML = el.getAttribute("data-new_name") || translations.new_group;
 	bookmark.id = "bookmark_" + el.id;
-	bookmark.addEventListener("click", () => el.scrollIntoView({block: "nearest", behavior: "smooth"}));
-	bookmark.addEventListener("dragover", () => el.scrollIntoView({block: "nearest", behavior: "smooth"}));
+	bookmark.addEventListener("click", () => {
+		el.scrollIntoView({block: "nearest", behavior: "smooth"});
+		selectGroup(el);
+	});
+	bookmark.addEventListener("dragover", () => {
+		el.scrollIntoView({block: "nearest", behavior: "smooth"});
+		selectGroup(el);
+	});
 
 	if (dragmap.children.length == 0) dragmap.appendChild(bookmark);
 	else dragmap.insertBefore(bookmark, dragmap.children[0]);

@@ -177,13 +177,12 @@ function updateHtml(file_obj) {
 }
 
 async function applyFileNames() {
-	var files = document.getElementsByTagName("file");
 	var files_array = [];
 
-	for (var i = 0; i < files.length; i++) {
-		var file_obj = current_file_names[files[i].id.replace("file_", "")];
-		if (file_obj.original != file_obj.current) files_array.push({current:file_obj.original, new:file_obj.current});
+	for (var i = 0; i < current_file_names.length; i++) {
+		var file_obj = current_file_names[i];
 		file_obj.original = file_obj.current;
+		if (file_obj.original != file_obj.current) files_array.push({current:file_obj.original, new:file_obj.current});
 	}
 
 	if (files_array.length == 0) return;
