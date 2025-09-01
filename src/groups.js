@@ -1,5 +1,14 @@
 var group_counter = 0;
 
+function loadGroup() {
+	default_group = document.createElement("group");
+	default_group.id = "default_group";
+	default_group.setAttribute("data-new_name", translations.default_group);
+
+	main.appendChild(default_group);
+	groupInit(default_group);
+}
+
 function groupInit(el) {
 	el.addEventListener("dragover", dragOver);
 	el.addEventListener("click", (e) => selectGroup(e.currentTarget));
@@ -21,11 +30,11 @@ function groupInit(el) {
 	else dragmap.insertBefore(bookmark, dragmap.children[0]);
 }
 
-function createGroup() {
+function createGroup(name, enumeration) {
 	var new_group = document.createElement("group");
 	new_group.id = "group_" + group_counter;
-	new_group.setAttribute("data-new_name", "");
-	new_group.setAttribute("data-enumeration", "numerical");
+	new_group.setAttribute("data-new_name", name);
+	new_group.setAttribute("data-enumeration", enumeration);
 	groupInit(new_group);
 	selectGroup(new_group);
 

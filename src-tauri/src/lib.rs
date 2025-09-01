@@ -5,6 +5,7 @@ use std::env;
 
 mod get;
 mod rename;
+mod config;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -12,7 +13,9 @@ pub fn run() {
 	tauri::Builder::default()
 		.invoke_handler(tauri::generate_handler![
 			get::select_folder,
-			rename::rename_files
+			rename::rename_files,
+			config::read,
+			config::store
 		])
 		.plugin(tauri_plugin_updater::Builder::new().build())
 		.plugin(tauri_plugin_dialog::init())

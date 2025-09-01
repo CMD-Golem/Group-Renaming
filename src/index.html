@@ -10,8 +10,8 @@
 	<script defer src="dragging.js"></script>
 	<script defer src="groups.js"></script>
 	<script defer src="files.js"></script>
-	<script defer src="config.js"></script>
 	<script defer src="renaming.js"></script>
+	<script defer src="config.js"></script>
 
 	<script defer src="init.js"></script>
 </head>
@@ -37,7 +37,7 @@
 
 			<br>
 			<label for="preview_size">Vorschaugrösse</label>
-			<input type="range" id="preview_size" min="50" max="300" oninput="css_root.style.setProperty('--file-width', this.value + 'px');" onchange="window.localStorage.setItem('preview_size', this.value + 'px');">
+			<input type="range" id="preview_size" min="50" max="300" oninput="css_root.style.setProperty('--file-width', this.value + 'px');" onchange="window.localStorage.setItem('preview_size', this.value);">
 
 			<br>
 			<p style="font-weight: bold;">Ersatzzeichen</p>

@@ -59,7 +59,7 @@ function dragEnd(e) {
 
 	// create new group if needed
 	if (target.parentElement.id == "create_group") {
-		var new_container = createGroup();
+		var new_container = createGroup("", "numerical");
 		new_container.appendChild(target);
 	}
 
@@ -93,6 +93,7 @@ function dragEnd(e) {
 		target.parentElement.insertBefore(selected_element, target.nextSibling);
 	}
 
+	unsaved_changes = true;
 	selected_elements_list = [];
 	animation(element_positions, elements);
 }

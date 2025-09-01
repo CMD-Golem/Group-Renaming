@@ -3,7 +3,7 @@
 	"notes": "",
 	"platforms": {
 		"windows-x86_64": {
-			"signature": "",
+			"signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRaFlKemg4MmxMUzVUaEIzSTRiT0EvUk5Ra1dMOWwvRGk3VjBITTZadEJoUlA0NUpYUjlhR3NYWjIrQ3ducDBhTHhqdGErSk5FbTNMWG5kZHVOY1Via0Jlc1JDWlFWRndvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzU2NzQ4NzgxCWZpbGU6R3JvdXAgUmVuYW1pbmdfMC4xLjBfeDY0X2VuLVVTLm1zaQp6VVBzRmxDSHJ2MEhXdHJBblhKbzJ5N2tVQ0hvN1Y4TE1mMVlrMHJwM1pxNkZqN3FycGprajdMYW0velZKbi9NUnJkOXZuK29PTjE0dVVObkdsbzVEQT09Cg==",
 			"url": "https://github.com/CMD-Golem/Group-Renaming/releases/download/0.1.0/Group.Renaming_0.1.0_x64_en-US.msi"
 		}
 	}

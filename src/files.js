@@ -40,25 +40,11 @@ function selectFile(e) {
 	e.currentTarget.classList.add("last_selected_element", "selected_element");
 }
 
-function loadFiles(msg) {
-	cleanUp();
-	var object = msg.payload;
-	file_path = object.dir;
-
-	// load defaul group
-	default_group = document.createElement("group");
-	default_group.id = "default_group";
-	default_group.setAttribute("data-new_name", translations.default_group);
-
-	main.appendChild(default_group);
-	groupInit(default_group);
-
-	// load files
-	if (object.status == "error") return print(object.error);
+function loadFiles(files) {
 	var path = "http://asset.localhost/" + file_path + "\\";
 
-	for (var i = 0; i < object.files.length; i++) {
-		var file_name = object.files[i];
+	for (var i = 0; i < files.length; i++) {
+		var file_name = files[i];
 		var element = document.createElement("file");
 		element.id = "file_" + file_counter;
 		element.draggable = true;

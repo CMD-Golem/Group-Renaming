@@ -8,6 +8,7 @@ const dialog = document.querySelector("dialog");
 const context_menu = document.querySelector("contextmenu");
 const create_group = document.getElementById("create_group");
 const dragmap = document.getElementById("dragmap");
+var unsaved_changes = false; // is set in: dragEnd, renameGroup, renameManuall, applyFileNames; is reset in storeConfig
 var default_group = undefined;
 var file_path = undefined;
 var contextmenu_selected = undefined;
@@ -27,6 +28,8 @@ const translations = {
 	new_name: "Angefordeter neuer Name",
 	renaming_success: "Alle Dateien wurden erfolgreich umbenannt",
 	renaming_with_problems: "Dateien wurden umbenannt<br>Folgende Dateien konnten nicht umbenannt werden:",
+	config_stored: "Die Konfiguration wurde erfolgreich gespeichert",
+	config_restored: "Die Konfiguration wurde erfolgreich wiederhergestellt",
 }
 
 function globalInit() {
@@ -35,10 +38,11 @@ function globalInit() {
 
 	// preview size
 	var preview_size = window.localStorage.getItem("preview_size");
+	console.log(preview_size)
 	if (preview_size == null) preview_size = 100;
 
 	document.getElementById("preview_size").value = preview_size;
-	css_root.style.setProperty('--file-width', preview_size);
+	css_root.style.setProperty('--file-width', preview_size + "px");
 
 	body.addEventListener("click", () => {
 		context_menu.classList.remove("visible");
@@ -46,18 +50,46 @@ function globalInit() {
 
 	// tauri
 	if (t != undefined) {
-		t.event.listen("files", loadFiles);
+		t.event.listen("files", loadData);
 
-		// // ask before closing
-		// t.window.getCurrentWindow().onCloseRequested(async (event) => {
-		// 	if (unsaved_campaign) {
-		// 		var user_action = await openDialog("unsaved_changes");
-		
-		// 		if (user_action == "dialog_yes") await saveCampaign();
-		// 		else if (user_action == "dialog_cancel") event.preventDefault();
-		// 	}
-		// });
+		// ask before closing
+		t.window.getCurrentWindow().onCloseRequested((event) => {
+			if (unsaved_changes) {
+				event.preventDefault();
+
+				dialog.innerHTML = `
+					<p>Die Änderungen wurden nicht gespeichert.</p>
+					<p>Soll die Konfiguration gespeichert werden?</p>
+					<div onclick="cleanDialog()">
+						<button onclick="storeConfig(); t.window.getCurrentWindow().destroy()">Ja</button>
+						<button onclick="t.window.getCurrentWindow().destroy()">Nein</button>
+						<button>Abbrechen</button>
+					</div>
+				`;
+				dialog.showModal();
+			}
+		});
 	};
+}
+
+function loadData(msg) {
+	var object = msg.payload;
+	console.log(object);
+	if (object.status == "error") {
+		dialog.innerHTML = `<p>${object.error}</p><button onclick="cleanDialog()">Ok</button>`;
+		dialog.showModal();
+		return;
+	}
+
+	cleanUp();
+	file_path = object.dir;
+	
+	loadGroup();
+	loadFiles(object.files);
+	if (object.config != null) {
+		var config = JSON.parse(object.config);
+		loadConfig(config);
+	}
 }
 
 function cleanUp() {

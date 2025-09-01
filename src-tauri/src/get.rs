@@ -1,22 +1,24 @@
 use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 use tauri_plugin_dialog::DialogExt;
-use std::fs;
+use std::{fs, path::Path};
 use serde::Serialize;
 
 const FILE_TYPES: [&str; 14] = ["apng", "avif", "bmp", "cur", "gif", "ico", "jfif", "jpeg", "jpg", "pjp", "pjpeg", "png", "svg", "webp"];
 
 #[derive(Serialize, Clone)]
 struct ExportFolder {
-	response: &'static str,
+	status: &'static str,
 	dir: String,
+	config: Option<String>,
 	files: Vec<String>,
 }
 
 impl ExportFolder {
 	fn new(dir: &str) -> Self {
 		Self {
-			response: "success",
+			status: "success",
 			dir: dir.to_string(),
+			config: None,
 			files: Vec::new(),
 		}
 	}
@@ -45,6 +47,12 @@ fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> 
 
 	// add folder to tauri scope
 	let _ = app.asset_protocol_scope().allow_directory(dir, false);
+
+	// get config if it exists
+	let config_path = Path::new(dir).join(".group-renaming.conf.json");
+	if config_path.try_exists()? {
+		object.config = Some(fs::read_to_string(&config_path)?);
+	}
 
 	// send files to frontend
 	for entry in fs::read_dir(dir)? {

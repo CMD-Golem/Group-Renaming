@@ -21,6 +21,7 @@ async function renameGroup() {
 	var files = selected.getElementsByTagName("file");
 	var needs_check = [];
 	var needs_update = [];
+	unsaved_changes = true;
 	
 	for (var i = 0; i < files.length; i++) {
 		// increase custom enums
@@ -59,6 +60,7 @@ function startRenameManuall() {
 
 	input.addEventListener("blur", renameManuall);
 	input.addEventListener("keydown", renameManuall);
+	input.addEventListener("paste", noFormatting);
 }
 
 async function renameManuall(e) {
@@ -66,6 +68,7 @@ async function renameManuall(e) {
 		var needs_update = [];
 		var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
 		file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
+		unsaved_changes = true;
 
 		parseName(file_obj);
 		await checkNewName(file_obj, needs_update);
@@ -77,6 +80,7 @@ async function renameManuall(e) {
 	// disable editing
 	e.target.removeEventListener("blur", renameManuall);
 	e.target.removeEventListener("keydown", renameManuall);
+	e.target.removeEventListener("paste", noFormatting);
 	e.target.blur();
 	e.target.contentEditable = false;
 }
@@ -181,8 +185,8 @@ async function applyFileNames() {
 
 	for (var i = 0; i < current_file_names.length; i++) {
 		var file_obj = current_file_names[i];
-		file_obj.original = file_obj.current;
 		if (file_obj.original != file_obj.current) files_array.push({current:file_obj.original, new:file_obj.current});
+		file_obj.original = file_obj.current;
 	}
 
 	if (files_array.length == 0) return;
@@ -215,13 +219,15 @@ async function applyFileNames() {
 		error_html += `<tr><td>${error_files.status}</td><td>${error_files.current}</td><td>${error_files.new}</td></tr>`;
 	}
 
-	// reset original file name
-	for (var i = 0; i < response.errors.length; i++) {
-
-	}
-
 	if (response.errors.length == 0) dialog.innerHTML = `<p>${translations.renaming_success}</p><button onclick="cleanDialog()">Ok</button>`;
 	else dialog.innerHTML = `<p>${translations.renaming_with_problems}</p><table>${error_html}</table><button onclick="cleanDialog()">Ok</button>`;
 
 	dialog.showModal();
+	unsaved_changes = true;
+}
+
+function noFormatting(e) {
+	e.preventDefault();
+	var text = e.clipboardData.getData("text/plain");
+	document.execCommand("insertText", false, text);
 }
