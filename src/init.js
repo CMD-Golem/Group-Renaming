@@ -38,7 +38,6 @@ function globalInit() {
 
 	// preview size
 	var preview_size = window.localStorage.getItem("preview_size");
-	console.log(preview_size)
 	if (preview_size == null) preview_size = 100;
 
 	document.getElementById("preview_size").value = preview_size;
@@ -74,7 +73,6 @@ function globalInit() {
 
 function loadData(msg) {
 	var object = msg.payload;
-	console.log(object);
 	if (object.status == "error") {
 		dialog.innerHTML = `<p>${object.error}</p><button onclick="cleanDialog()">Ok</button>`;
 		dialog.showModal();

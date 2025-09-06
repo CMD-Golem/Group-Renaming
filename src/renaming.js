@@ -193,7 +193,6 @@ async function applyFileNames() {
 
 	var json = await invoke("rename_files", {dir:file_path, files:files_array});
 	var response = await JSON.parse(json);
-	console.log(response)
 
 	// show error
 	if (response.status == "error") {

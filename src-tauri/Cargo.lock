@@ -1302,7 +1302,7 @@ dependencies = [
 
 [[package]]
 name = "group-renaming"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "infer",
  "once_cell",

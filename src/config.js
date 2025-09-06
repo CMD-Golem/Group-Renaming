@@ -17,13 +17,10 @@ async function storeConfig() {
 		config_array.push({name, enumeration, files});
 	}
 
-	console.log(config_array)
-
 	var config_string = JSON.stringify(config_array);
 
 	var json = await invoke("store", {dir:file_path, config:config_string});
 	var response = await JSON.parse(json);
-	console.log(response);
 
 	if (response.status == "error") dialog.innerHTML = `<p>${response.error}</p><button onclick="cleanDialog()">Ok</button>`;
 	else {
