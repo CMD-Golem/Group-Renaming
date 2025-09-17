@@ -2,31 +2,43 @@ async function renameGroup() {
 	var selected = document.querySelector(".selected_container");
 	var group_name = document.getElementById("new_name").value;
 	var enumeration = document.getElementById("enumeration").value;
+	var index = parseInt(document.getElementById("starting_index").value);
 
 	if (selected == null) return;
+
+	// patch index
+	if (index <= 1) index = 0;
+	else index -= 1;
 
 	// store new group data
 	selected.setAttribute("data-new_name", group_name);
 	selected.setAttribute("data-enumeration", enumeration);
+	selected.setAttribute("data-index", index + 1);
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
-
-	// handle enum variants
-	if (enumeration == "numerical") var convertion = false;
-	else if (enumeration == "big_letters") var convertion = 65;
-	else if (enumeration == "small_letters") var convertion = 97;
-
-	// add enum to the end if it is not included
-	if (!group_name.includes(":e")) group_name += " :e";
 
 	var files = selected.getElementsByTagName("file");
 	var needs_check = [];
 	var needs_update = [];
 	unsaved_changes = true;
 	
+
+	// handle enum variants
+	var convertion = 0;
+	var leading_zeros = 0;
+
+	if (enumeration == "big_letters") convertion = 65;
+	else if (enumeration == "small_letters") convertion = 97;
+	else if (enumeration == "leading_zeros") leading_zeros = (files.length + index).toString().length;
+
+	// add enum to the end if it is not included
+	if (!group_name.includes(":e")) group_name += " :e";
+	
 	for (var i = 0; i < files.length; i++) {
+		// add leading zeros
+		if (convertion == 0 && leading_zeros != 0) var enum_char = (i + 1 + index).toString().padStart(leading_zeros, "0");
 		// increase custom enums
-		if (convertion != false) {
-			var loop = i + 1;
+		else if (convertion != 0) {
+			var loop = i + 1 + index;
 			var enum_char = "";
 			while (loop > 0) {
 				loop--;
@@ -34,7 +46,8 @@ async function renameGroup() {
 				loop = Math.floor(loop / 26);
 			}
 		}
-		else var enum_char = i + 1;
+		// nummerical
+		else var enum_char = i + 1 + index;
 
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
 		file_obj.enumeration = enum_char;

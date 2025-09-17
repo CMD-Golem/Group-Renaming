@@ -5,6 +5,7 @@ async function storeConfig() {
 	for (var i = 0; i < groups.length; i++) {
 		var name = groups[i].getAttribute("data-new_name");
 		var enumeration = groups[i].getAttribute("data-enumeration");
+		var index = groups[i].getAttribute("data-index");
 		var files = [];
 
 		var el_files = groups[i].getElementsByTagName("file");
@@ -14,7 +15,7 @@ async function storeConfig() {
 			files.push({original, raw_current, current, enumeration});
 		}
 
-		config_array.push({name, enumeration, files});
+		config_array.push({name, enumeration, index, files});
 	}
 
 	var config_string = JSON.stringify(config_array);
@@ -33,7 +34,7 @@ async function storeConfig() {
 function loadConfig(groups) {
 	for (var i = groups.length -1; i >= 0; i--) {
 		if (groups[i].enumeration == null) continue;
-		var group = createGroup(groups[i].name, groups[i].enumeration);
+		var group = createGroup(groups[i].name, groups[i].enumeration, groups[i].index);
 		var group_name = groups[i].name;
 		if (!group_name.includes(":e")) group_name += " :e";
 

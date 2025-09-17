@@ -24,11 +24,14 @@
 			<label for="new_name">Neuer Name</label>
 			<input type="text" id="new_name" autocomplete="one-time-code">
 			<label for="enumeration">Nummerierungszeichen <span>(:e)</span></label>
-			<select id="enumeration">
-				<option value="numerical">123</option>
+			<select id="enumeration" onchange="window.localStorage.setItem('enumeration', this.value);">
+				<option value="numerical">1 2 3</option>
+				<option value="leading_zeros">01 02 03</option>
 				<option value="big_letters">ABC</option>
 				<option value="small_letters">abc</option>
 			</select>
+			<label for="starting_index">Start Index</label>
+			<input type="number" id="starting_index" autocomplete="one-time-code">
 			
 			<br>
 			<button onclick="renameGroup()">Ausgewählte Gruppe aktualisieren</button>

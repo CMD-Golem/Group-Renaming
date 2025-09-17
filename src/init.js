@@ -43,6 +43,10 @@ function globalInit() {
 	document.getElementById("preview_size").value = preview_size;
 	css_root.style.setProperty('--file-width', preview_size + "px");
 
+	// enumeration selection
+	document.getElementById("enumeration").value = window.localStorage.getItem("enumeration") || "numerical";
+
+	// context menu
 	body.addEventListener("click", () => {
 		context_menu.classList.remove("visible");
 	});

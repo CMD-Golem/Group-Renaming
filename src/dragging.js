@@ -59,7 +59,7 @@ function dragEnd(e) {
 
 	// create new group if needed
 	if (target.parentElement.id == "create_group") {
-		var new_container = createGroup("", "numerical");
+		var new_container = createGroup("", window.localStorage.getItem("enumeration"), "1");
 		new_container.appendChild(target);
 	}
 
