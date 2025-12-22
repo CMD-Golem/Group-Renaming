@@ -1,6 +1,6 @@
 use tauri::Manager;
 use tauri_plugin_updater::UpdaterExt;
-use tauri_plugin_prevent_default::Flags;
+use tauri_plugin_prevent_default::{Flags, PlatformOptions};
 use std::env;
 
 mod get;
@@ -53,10 +53,20 @@ pub fn run() {
 fn prevent_default() -> tauri::plugin::TauriPlugin<tauri::Wry> {
 	tauri_plugin_prevent_default::Builder::new()
 		.with_flags(Flags::all().difference(Flags::DEV_TOOLS | Flags::RELOAD))
+		.platform(PlatformOptions::new()
+			.general_autofill(false)
+			.password_autosave(false)
+		)
 		.build()
 }
 
 #[cfg(not(debug_assertions))]
 fn prevent_default() -> tauri::plugin::TauriPlugin<tauri::Wry> {
-	tauri_plugin_prevent_default::init()
+	tauri_plugin_prevent_default::Builder::new()
+		.with_flags(Flags::all())
+		.platform(PlatformOptions::new()
+			.general_autofill(false)
+			.password_autosave(false)
+		)
+		.build()
 }

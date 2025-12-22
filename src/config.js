@@ -23,11 +23,12 @@ async function storeConfig() {
 	var json = await invoke("store", {dir:file_path, config:config_string});
 	var response = await JSON.parse(json);
 
-	if (response.status == "error") dialog.innerHTML = `<p>${response.error}</p><button onclick="cleanDialog()">Ok</button>`;
+	if (response.status == "error") dialog.innerHTML = `<p>${response.error}</p><button onclick="dialog.close()">Ok</button>`;
 	else {
-		dialog.innerHTML = `<p>${translations.config_stored}</p><button onclick="cleanDialog()">Ok</button>`;
+		dialog.innerHTML = `<p>${translations.config_stored}</p><button onclick="dialog.close()">Ok</button>`;
 		unsaved_changes = false;
 	}
+	dialog.setAttribute("closedby","any");
 	dialog.showModal();
 }
 
@@ -57,6 +58,6 @@ function loadConfig(groups) {
 		}
 	}
 
-	// dialog.innerHTML = `<p>${translations.config_restored}</p><button onclick="cleanDialog()">Ok</button>`;
+	// dialog.innerHTML = `<p>${translations.config_restored}</p><button onclick="dialog.close()">Ok</button>`;
 	// dialog.showModal();
 }

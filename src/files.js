@@ -41,14 +41,13 @@ function selectFile(e) {
 }
 
 function loadFiles(files) {
-	var path = "http://asset.localhost/" + file_path + "\\";
-
 	for (var i = 0; i < files.length; i++) {
 		var file_name = files[i];
+		var path = t.core.convertFileSrc(file_path + "\\" + file_name)
 		var element = document.createElement("file");
 		element.id = "file_" + file_counter;
 		element.draggable = true;
-		element.innerHTML = `<div><img src="${path + file_name}"></div><text>${file_name}</text>`;
+		element.innerHTML = `<div><img src="${path}"></div><text>${file_name}</text>`;
 		
 		element.addEventListener("dragstart", dragStart);
 		element.addEventListener("dragend", dragEnd);
@@ -115,6 +114,7 @@ function imageViewer() {
 		</div>
 		<div class="zoomist-close">&#9587;</div>
 	`;
+	dialog.setAttribute("closedby","any");
 	dialog.showModal();
 	
 	new Zoomist('.zoomist-container', {

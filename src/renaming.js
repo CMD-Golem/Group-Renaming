@@ -1,44 +1,48 @@
 async function renameGroup() {
 	var selected = document.querySelector(".selected_container");
-	var group_name = document.getElementById("new_name").value;
-	var enumeration = document.getElementById("enumeration").value;
-	var index = parseInt(document.getElementById("starting_index").value);
+	var files = selected.getElementsByTagName("file");
 
 	if (selected == null) return;
 
-	// patch index
-	if (index <= 1) index = 0;
-	else index -= 1;
+	// add enum to the end if it is not included
+	var group_name = document.getElementById("new_name").value;
+	var auto_added_enum = false;
+	if (!group_name.includes(":e")) {
+		group_name += " :e";
+		auto_added_enum = true;
+	}
+
+	// patch index and handle leading zeros
+	var index_str = document.getElementById("starting_index").value;
+	var leading_zeros = index_str.length;
+
+	var index_int = parseInt(index_str);
+	if (index_int <= 1) index_int = 0;
+	else index_int -= 1;
+
+	// handle enum variants
+	var enumeration = document.getElementById("enumeration").value;
+	var convertion = 0;
+
+	if (enumeration == "big_letters") convertion = 65;
+	else if (enumeration == "small_letters") convertion = 97;
 
 	// store new group data
 	selected.setAttribute("data-new_name", group_name);
 	selected.setAttribute("data-enumeration", enumeration);
-	selected.setAttribute("data-index", index + 1);
+	selected.setAttribute("data-index", index_str);
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
 
-	var files = selected.getElementsByTagName("file");
 	var needs_check = [];
 	var needs_update = [];
 	unsaved_changes = true;
-	
 
-	// handle enum variants
-	var convertion = 0;
-	var leading_zeros = 0;
-
-	if (enumeration == "big_letters") convertion = 65;
-	else if (enumeration == "small_letters") convertion = 97;
-	else if (enumeration == "leading_zeros") leading_zeros = (files.length + index).toString().length;
-
-	// add enum to the end if it is not included
-	if (!group_name.includes(":e")) group_name += " :e";
-	
 	for (var i = 0; i < files.length; i++) {
 		// add leading zeros
-		if (convertion == 0 && leading_zeros != 0) var enum_char = (i + 1 + index).toString().padStart(leading_zeros, "0");
+		if (convertion == 0 && leading_zeros != 0) var enum_char = (i + 1 + index_int).toString().padStart(leading_zeros, "0");
 		// increase custom enums
 		else if (convertion != 0) {
-			var loop = i + 1 + index;
+			var loop = i + 1 + index_int;
 			var enum_char = "";
 			while (loop > 0) {
 				loop--;
@@ -47,13 +51,13 @@ async function renameGroup() {
 			}
 		}
 		// nummerical
-		else var enum_char = i + 1 + index;
+		else var enum_char = i + 1 + index_int;
 
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
 		file_obj.enumeration = enum_char;
 		file_obj.group = group_name;
 		needs_check.push(file_obj);
-		parseName(file_obj);
+		parseName(file_obj, auto_added_enum);
 	}
 
 	for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
@@ -83,7 +87,7 @@ async function renameManuall(e) {
 		file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
 		unsaved_changes = true;
 
-		parseName(file_obj);
+		parseName(file_obj, false);
 		await checkNewName(file_obj, needs_update);
 		for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
 	}
@@ -98,9 +102,14 @@ async function renameManuall(e) {
 	e.target.contentEditable = false;
 }
 
-function parseName(file_obj) {
+function parseName(file_obj, auto_added_enum) {
+	// remove auto added enum if enum was manually added
+	// var group = file_obj.group;
+	// if (auto_added_enum && file_obj.raw_requested.includes(":e")) group.slice(0,-2);
+
+	// fill data
 	file_obj.requested = file_obj.raw_requested
-		.replace(":g", file_obj.group)
+		.replace(":g", group)
 		.replaceAll(":n", file_obj.original)
 		.replaceAll(":e", file_obj.enumeration)
 		.replaceAll(/[\\\/:*?"<>|]/g, "");
@@ -169,8 +178,8 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 			if (selected_obj == undefined || raw_requested == "") return;
 			selected_obj.raw_requested = raw_requested;
 
-			cleanDialog();
-			parseName(selected_obj);
+			dialog.close();
+			parseName(selected_obj, false);
 			await checkNewName(selected_obj, needs_update);
 			await checkNewName(keep_obj, needs_update);
 			resolve();
@@ -209,7 +218,8 @@ async function applyFileNames() {
 
 	// show error
 	if (response.status == "error") {
-		dialog.innerHTML = `<p>${response.error}</p><button onclick="cleanDialog()">Ok</button>`;
+		dialog.innerHTML = `<p>${response.error}</p><button onclick="dialog.close()">Ok</button>`;
+		dialog.setAttribute("closedby","any");
 		dialog.showModal();
 		return;
 	}
@@ -231,9 +241,10 @@ async function applyFileNames() {
 		error_html += `<tr><td>${error_files.status}</td><td>${error_files.current}</td><td>${error_files.new}</td></tr>`;
 	}
 
-	if (response.errors.length == 0) dialog.innerHTML = `<p>${translations.renaming_success}</p><button onclick="cleanDialog()">Ok</button>`;
-	else dialog.innerHTML = `<p>${translations.renaming_with_problems}</p><table>${error_html}</table><button onclick="cleanDialog()">Ok</button>`;
+	if (response.errors.length == 0) dialog.innerHTML = `<p>${translations.renaming_success}</p><button onclick="dialog.close()">Ok</button>`;
+	else dialog.innerHTML = `<p>${translations.renaming_with_problems}</p><table>${error_html}</table><button onclick="dialog.close()">Ok</button>`;
 
+	dialog.setAttribute("closedby","any");
 	dialog.showModal();
 	unsaved_changes = true;
 }

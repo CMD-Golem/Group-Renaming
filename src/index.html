@@ -18,7 +18,7 @@
 <body>
 	<aside>
 		<div>
-			<button onclick="invoke('select_folder')">Ordner wählen</button>
+			<button onclick="requestNewFolder()">Ordner wählen</button>
 
 			<br>
 			<label for="new_name">Neuer Name</label>
@@ -26,7 +26,6 @@
 			<label for="enumeration">Nummerierungszeichen <span>(:e)</span></label>
 			<select id="enumeration" onchange="window.localStorage.setItem('enumeration', this.value);">
 				<option value="numerical">1 2 3</option>
-				<option value="leading_zeros">01 02 03</option>
 				<option value="big_letters">ABC</option>
 				<option value="small_letters">abc</option>
 			</select>
@@ -55,7 +54,7 @@
 	</aside>
 	<aside id="dragmap"></aside>
 	<main></main>
-	<dialog closedby="none"></dialog>
+	<dialog closedby="none" onclose="cleanDialog()"></dialog>
 	<contextmenu>
 		<button onclick="startRenameManuall()">Umbenennen</button>
 		<button onclick="imageViewer()">Bild vergrössern</button>

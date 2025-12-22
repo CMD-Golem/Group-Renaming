@@ -63,7 +63,7 @@ function globalInit() {
 				dialog.innerHTML = `
 					<p>Die Änderungen wurden nicht gespeichert.</p>
 					<p>Soll die Konfiguration gespeichert werden?</p>
-					<div onclick="cleanDialog()">
+					<div onclick="dialog.close()">
 						<button onclick="storeConfig(); t.window.getCurrentWindow().destroy()">Ja</button>
 						<button onclick="t.window.getCurrentWindow().destroy()">Nein</button>
 						<button>Abbrechen</button>
@@ -78,7 +78,8 @@ function globalInit() {
 function loadData(msg) {
 	var object = msg.payload;
 	if (object.status == "error") {
-		dialog.innerHTML = `<p>${object.error}</p><button onclick="cleanDialog()">Ok</button>`;
+		dialog.innerHTML = `<p>${object.error}</p><button onclick="dialog.close()">Ok</button>`;
+		dialog.setAttribute("closedby","any");
 		dialog.showModal();
 		return;
 	}
@@ -107,8 +108,22 @@ function cleanUp() {
 
 globalInit();
 
+function requestNewFolder() {
+	if (!unsaved_changes) return invoke('select_folder');
+
+	dialog.innerHTML = `
+		<p>Die Änderungen wurden nicht gespeichert.</p>
+		<p>Soll die Konfiguration gespeichert werden?</p>
+		<div onclick="dialog.close()">
+			<button onclick="storeConfig(); invoke('select_folder')">Ja</button>
+			<button onclick="invoke('select_folder')">Nein</button>
+			<button>Abbrechen</button>
+		</div>
+	`;
+	dialog.showModal();
+}
 
 function cleanDialog() {
-	dialog.close();
+	dialog.setAttribute("closedby","none");
 	dialog.innerHTML = "";
 }
