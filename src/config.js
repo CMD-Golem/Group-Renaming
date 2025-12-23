@@ -11,8 +11,8 @@ async function storeConfig() {
 		var el_files = groups[i].getElementsByTagName("file");
 
 		for (var j = 0; j < el_files.length; j++) {
-			let { original, raw_current, current, enumeration } = current_file_names[el_files[j].id.replace("file_", "")];
-			files.push({original, raw_current, current, enumeration});
+			let { original, raw_current, current, enumeration, auto_added_enum } = current_file_names[el_files[j].id.replace("file_", "")];
+			files.push({original, raw_current, current, enumeration, auto_added_enum});
 		}
 
 		config_array.push({name, enumeration, index, files});
@@ -37,7 +37,6 @@ function loadConfig(groups) {
 		if (groups[i].enumeration == null) continue;
 		var group = createGroup(groups[i].name, groups[i].enumeration, groups[i].index);
 		var group_name = groups[i].name;
-		if (!group_name.includes(":e")) group_name += " :e";
 
 		for (var j = 0; j < groups[i].files.length; j++) {
 			var file_data = groups[i].files[j];
@@ -50,6 +49,7 @@ function loadConfig(groups) {
 			file_obj.requested = file_data.current;
 			file_obj.group = group_name;
 			file_obj.enumeration = file_data.enumeration;
+			file_obj.auto_added_enum = file_data.auto_added_enum;
 
 			var file_el = document.getElementById(file_obj.id);
 			file_el.remove();

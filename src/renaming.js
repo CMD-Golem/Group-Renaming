@@ -8,9 +8,10 @@ async function renameGroup() {
 	var group_name = document.getElementById("new_name").value;
 	var auto_added_enum = false;
 	if (!group_name.includes(":e")) {
-		group_name += " :e";
+		group_name_mod = group_name + ":e";
 		auto_added_enum = true;
 	}
+	else group_name_mod = group_name;
 
 	// patch index and handle leading zeros
 	var index_str = document.getElementById("starting_index").value;
@@ -55,9 +56,10 @@ async function renameGroup() {
 
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
 		file_obj.enumeration = enum_char;
-		file_obj.group = group_name;
+		file_obj.group = group_name_mod;
+		file_obj.auto_added_enum = auto_added_enum;
 		needs_check.push(file_obj);
-		parseName(file_obj, auto_added_enum);
+		parseName(file_obj);
 	}
 
 	for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
@@ -87,7 +89,7 @@ async function renameManuall(e) {
 		file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
 		unsaved_changes = true;
 
-		parseName(file_obj, false);
+		parseName(file_obj);
 		await checkNewName(file_obj, needs_update);
 		for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
 	}
@@ -102,14 +104,14 @@ async function renameManuall(e) {
 	e.target.contentEditable = false;
 }
 
-function parseName(file_obj, auto_added_enum) {
+function parseName(file_obj) {
 	// remove auto added enum if enum was manually added
-	// var group = file_obj.group;
-	// if (auto_added_enum && file_obj.raw_requested.includes(":e")) group.slice(0,-2);
+	var group_name = file_obj.group;
+	if (file_obj.auto_added_enum && file_obj.raw_requested.includes(":e")) group_name = group_name.slice(0,-2);
 
 	// fill data
 	file_obj.requested = file_obj.raw_requested
-		.replace(":g", group)
+		.replace(":g", group_name)
 		.replaceAll(":n", file_obj.original)
 		.replaceAll(":e", file_obj.enumeration)
 		.replaceAll(/[\\\/:*?"<>|]/g, "");
@@ -179,7 +181,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 			selected_obj.raw_requested = raw_requested;
 
 			dialog.close();
-			parseName(selected_obj, false);
+			parseName(selected_obj);
 			await checkNewName(selected_obj, needs_update);
 			await checkNewName(keep_obj, needs_update);
 			resolve();

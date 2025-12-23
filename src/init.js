@@ -124,6 +124,7 @@ function requestNewFolder() {
 }
 
 function cleanDialog() {
+	dialog.close();
 	dialog.setAttribute("closedby","none");
 	dialog.innerHTML = "";
 }
