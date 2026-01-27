@@ -24,6 +24,12 @@ impl ExportFolder {
 	}
 }
 
+#[derive(Serialize, Clone)]
+struct ReportError {
+	status: &'static str,
+	error: String,
+}
+
 #[tauri::command]
 pub fn select_folder(app: AppHandle, window: WebviewWindow) {
 	app.dialog().file().pick_folder(move |folder_path| {
@@ -38,7 +44,13 @@ pub fn load_folder(app: AppHandle, dir: &str) {
 	let response = get_files(app.clone(), dir);
 	match response {
 		Ok(object) => app.emit("files", object).unwrap(),
-		Err(err) => app.emit("files", format!("{{\"status\":\"error\", \"error\":\"{:?}\"}}", err)).unwrap(),
+		Err(err) => {
+			let payload = ReportError{
+				status: "error",
+				error: err.to_string(),
+			};
+			app.emit("files", payload).unwrap()
+		}
 	}
 }
 
@@ -57,6 +69,8 @@ fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> 
 	// send files to frontend
 	for entry in fs::read_dir(dir)? {
 		let path = entry?.path();
+
+		if path.is_dir() { continue; }
 
 		// check if file is an image
 		let extension = match infer::get_from_path(&path)? {

@@ -1,6 +1,7 @@
 use tauri::{AppHandle, Manager};
 use serde::{Serialize, Deserialize};
 use std::{fs, path::Path};
+use serde_json::json;
 
 #[derive(Deserialize, Debug)]
 pub struct RenameFolder {
@@ -69,7 +70,7 @@ pub fn rename_files(app: AppHandle, dir: &str, mut files: Vec<RenameFolder>) -> 
 
 	match serde_json::to_string(&res) {
 		Ok(json) => json,
-		Err(e) => format!("{{\"status\":\"error\", \"error\":\"{e}\"}}"),
+		Err(e) => json!({"status":"error", "error":e.to_string()}).to_string(),
 	}
 }
 

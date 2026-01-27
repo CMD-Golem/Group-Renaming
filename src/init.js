@@ -77,12 +77,15 @@ function globalInit() {
 
 function loadData(msg) {
 	var object = msg.payload;
+
 	if (object.status == "error") {
-		dialog.innerHTML = `<p>${object.error}</p><button onclick="dialog.close()">Ok</button>`;
+		dialog.innerHTML = `<p>${object.error}</p><button onclick="t.window.getCurrentWindow().destroy()">Ok</button>`;
 		dialog.setAttribute("closedby","any");
 		dialog.showModal();
 		return;
 	}
+
+	console.log(object);
 
 	cleanUp();
 	file_path = object.dir;

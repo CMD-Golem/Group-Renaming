@@ -1,10 +1,10 @@
 {
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"notes": "",
 	"platforms": {
 		"windows-x86_64": {
-			"signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRaFlKemg4MmxMUzNsUFljTmh1OGVMWElSMXhsdjFjaDBtZ0JYMGpySHVGYTkvcm5pYUszMXNFUGVCVEFkdE0vdkNaUkVzdE5mMmYzU0pab3hxVFlOUlgrMk1VQ251SkFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY2NTAzMDI0CWZpbGU6R3JvdXAgUmVuYW1pbmdfMC4xLjNfeDY0X2VuLVVTLm1zaQpvVlEyeHdXWVNOS1VvTzNNemRzRzJ2SFlTZS9Qb0lTckcrc0JyU2UyVUJzZS95eVUxLzI2RHNSbHN1UXlEU3Y4MGFDU2VZMVVoQkNMNDlGdjdzR0VEQT09Cg==",
-			"url": "https://github.com/CMD-Golem/Group-Renaming/releases/download/0.1.3/Group.Renaming_0.1.3_x64_en-US.msi"
+			"signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRaFlKemg4MmxMUytJR01VWnpEQ0hxWmdyQ2R6V0NCWGJ6T0I0aW0yQ1NRcGE5VzlCOWNIM3FGSUhhQjYwYzcvL1kvRUkwdGF0cFdhNFBnU0FxZkJaKytiWUt0VVBqS0FvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzY5NTQzMzkxCWZpbGU6R3JvdXAgUmVuYW1pbmdfMC4xLjRfeDY0X2VuLVVTLm1zaQpVc3U4NDZqdlhSUzNkK21IZGdPWHk0WFppdkw1RElQQ2FPMVp5K0xmejJSVjEzcDFBSTd4OXNINjNYanlKZXBRWk83azZHMjdkTGN3ekRzcTlkVzJBZz09Cg==",
+			"url": "https://github.com/CMD-Golem/Group-Renaming/releases/download/0.1.4/Group.Renaming_0.1.4_x64_en-US.msi"
 		}
 	}
 }
