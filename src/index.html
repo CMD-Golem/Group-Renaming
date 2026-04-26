@@ -42,6 +42,9 @@
 			<input type="range" id="preview_size" min="50" max="300" oninput="css_root.style.setProperty('--file-width', this.value + 'px');" onchange="window.localStorage.setItem('preview_size', this.value);">
 
 			<br>
+			<button onclick="orderGroupDate()">Gruppe nach Datum sortieren</button>
+
+			<br>
 			<p style="font-weight: bold;">Ersatzzeichen</p>
 			<p>:e&Tab;Nummerierungszeichen einfügen</p>
 			<p>:n&Tab;Originialer Name einfügen</p>
@@ -58,6 +61,7 @@
 	<contextmenu>
 		<button onclick="startRenameManuall()">Umbenennen</button>
 		<button onclick="imageViewer()">Bild vergrössern</button>
+		<button onclick="copyOriginalName()">Org Namen kopieren</button>
 	</contextmenu>
 </body>
 </html>

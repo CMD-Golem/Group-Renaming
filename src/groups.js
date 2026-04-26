@@ -48,13 +48,45 @@ function createGroup(name, enumeration, index) {
 
 function selectGroup(element) {
 	if (element.id == "create_group" || element.id == "default_group") return;
+	if (element.classList.contains("selected_container")) return;
 
 	var groups = document.getElementsByTagName("group");
 	for (var i = 0; i < groups.length; i++) groups[i].classList.remove("selected_container");
 
-	element.classList.toggle("selected_container");
+	element.classList.add("selected_container");
 
 	document.getElementById("new_name").value = element.getAttribute("data-new_name");
 	document.getElementById("enumeration").value = element.getAttribute("data-enumeration");
 	document.getElementById("starting_index").value = element.getAttribute("data-index");
+}
+
+function orderBookmarkName() {
+	var sort_array = Array.from(dragmap.children);
+	sort_array.sort((a, b) => {
+		if (a.id == "bookmark_default_group") return 1;
+		if (b.id == "bookmark_default_group") return -1;
+		return a.textContent.localeCompare(b.textContent);
+	});
+
+	for (var i = 0; i < sort_array.length; i++) dragmap.appendChild(sort_array[i]);
+}
+
+function orderGroupDate() {
+	var selected = document.querySelector(".selected_container");
+	var files = Array.from(selected.getElementsByTagName("file"));
+
+	console.log(files)
+
+	if (selected == null) return;
+
+	files.sort((a, b) => {
+		var a_date = current_file_names[a.id.replace("file_", "")].modified_date;
+		var b_date = current_file_names[b.id.replace("file_", "")].modified_date;
+
+		return a_date - b_date;
+	});
+
+	console.log(files)
+
+	for (var i = 0; i < files.length; i++) selected.appendChild(files[i]);
 }

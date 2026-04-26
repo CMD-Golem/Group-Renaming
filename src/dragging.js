@@ -59,7 +59,11 @@ function dragEnd(e) {
 
 	// create new group if needed
 	if (target.parentElement.id == "create_group") {
-		var new_container = createGroup("", window.localStorage.getItem("enumeration"), "1");
+		var new_name = document.getElementById("new_name").value;
+		var enumeration = document.getElementById("enumeration").value;
+		var starting_index = document.getElementById("starting_index").value;
+		// var new_container = createGroup("", window.localStorage.getItem("enumeration"), "1");
+		var new_container = createGroup(new_name, enumeration, starting_index);
 		new_container.appendChild(target);
 	}
 

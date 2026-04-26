@@ -1,6 +1,8 @@
 var file_counter = 0;
+var started_manuall_renaming = false;
 
 function selectFile(e) {
+	if (started_manuall_renaming) return;
 	var current_state = e.currentTarget.classList.contains("selected_element");
 
 	// deselect all if ctrl isnt pressed
@@ -42,7 +44,7 @@ function selectFile(e) {
 
 function loadFiles(files) {
 	for (var i = 0; i < files.length; i++) {
-		var file_name = files[i];
+		var file_name = files[i].name;
 		var path = t.core.convertFileSrc(file_path + "\\" + file_name)
 		var element = document.createElement("file");
 		element.id = "file_" + file_counter;
@@ -67,6 +69,7 @@ function loadFiles(files) {
 			group: "",
 			enumeration: "",
 			auto_added_enum: false,
+			modified_date: files[i].date,
 		});
 	}
 }

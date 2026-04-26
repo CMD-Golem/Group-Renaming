@@ -10,7 +10,13 @@ struct ExportFolder {
 	status: &'static str,
 	dir: String,
 	config: Option<String>,
-	files: Vec<String>,
+	files: Vec<ExportFiles>,
+}
+
+#[derive(Serialize, Clone)]
+struct ExportFiles {
+	name: String,
+	date: u128,
 }
 
 impl ExportFolder {
@@ -86,7 +92,18 @@ fn get_files(app: AppHandle, dir: &str) -> Result<ExportFolder, std::io::Error> 
 			None => continue,
 		};
 
-		object.files.push(file_name);
+		// get file date
+		let modified_date = match fs::metadata(path)?.modified()?.duration_since(std::time::SystemTime::UNIX_EPOCH) {
+			Ok(n) => n.as_millis(),
+			Err(_) => 0
+		};
+
+		let file = ExportFiles{
+			name: file_name,
+			date: modified_date,
+		};
+
+		object.files.push(file);
 
 		// compress jpeg: mozjpeg .set_scale(1, 4);
 	}

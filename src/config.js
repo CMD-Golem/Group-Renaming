@@ -58,6 +58,8 @@ function loadConfig(groups) {
 		}
 	}
 
+	orderBookmarkName();
+
 	// dialog.innerHTML = `<p>${translations.config_restored}</p><button onclick="dialog.close()">Ok</button>`;
 	// dialog.showModal();
 }

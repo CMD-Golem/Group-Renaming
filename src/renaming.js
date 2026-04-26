@@ -14,7 +14,7 @@ async function renameGroup() {
 	else group_name_mod = group_name;
 
 	// patch index and handle leading zeros
-	var index_str = document.getElementById("starting_index").value;
+	var index_str = document.getElementById("starting_index").value || "1";
 	var leading_zeros = index_str.length;
 
 	var index_int = parseInt(index_str);
@@ -33,6 +33,7 @@ async function renameGroup() {
 	selected.setAttribute("data-enumeration", enumeration);
 	selected.setAttribute("data-index", index_str);
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
+	orderBookmarkName();
 
 	var needs_check = [];
 	var needs_update = [];
@@ -66,11 +67,17 @@ async function renameGroup() {
 	for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
 }
 
+function copyOriginalName() {
+	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
+	navigator.clipboard.writeText(file_obj.original);
+}
+
 function startRenameManuall() {
 	var input = contextmenu_selected.querySelector("text");
 	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
-	input.innerHTML = file_obj.raw_current;
+	started_manuall_renaming = true;
 	input.contentEditable = true;
+	input.innerHTML = file_obj.raw_current;
 	input.focus();
 
 	var sel = window.getSelection();
@@ -84,13 +91,20 @@ function startRenameManuall() {
 
 async function renameManuall(e) {
 	if (e.type == "blur" || (e.type == "keydown" && e.key == "Enter")) {
+		var needs_check = [];
 		var needs_update = [];
-		var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
-		file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
 		unsaved_changes = true;
 
-		parseName(file_obj);
-		await checkNewName(file_obj, needs_update);
+		var selected = document.querySelectorAll(".selected_element");
+
+		for (var i = 0; i < selected.length; i++) {	
+			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
+			file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
+
+			needs_check.push(file_obj);
+			parseName(file_obj);
+		}
+		for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
 		for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
 	}
 	else if (e.type == "keydown" && e.key == "Escape") e.target.innerHTML = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
@@ -102,6 +116,7 @@ async function renameManuall(e) {
 	e.target.removeEventListener("paste", noFormatting);
 	e.target.blur();
 	e.target.contentEditable = false;
+	started_manuall_renaming = false;
 }
 
 function parseName(file_obj) {

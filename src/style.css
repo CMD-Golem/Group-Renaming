@@ -86,12 +86,13 @@ group, dialog > div {
 	min-height: 20px;
 }
 
-#create_group, #default_group  {
-	min-height: 50px;
+#create_group  {
+	min-height: 150px;
 	border-color: var(--highlight-color);
 }
 
 #default_group {
+	min-height: 150px;
 	border-color: transparent;
 }
 
