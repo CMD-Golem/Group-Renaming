@@ -92,9 +92,9 @@ function dragEnd(e) {
 	
 	for (var i = selected_elements_list.length -1; i >= 0; i--) {
 		var selected_element = selected_elements_list[i];
-		setDefaultNames(selected_element, in_default_group);
 		selected_element.classList.remove("selected_element");
 		target.parentElement.insertBefore(selected_element, target.nextSibling);
+		setDefaultNames(selected_element, in_default_group);
 	}
 
 	unsaved_changes = true;
@@ -107,10 +107,14 @@ function setDefaultNames(element, in_default_group) {
 	if (in_default_group) {
 		file_obj.enumeration = "";
 		file_obj.group = "";
+		file_obj.position = undefined;
 	}
-	else if (!file_obj.raw_current.includes(":g")) {
-		file_obj.raw_current = ":g";
-		file_obj.raw_requested = ":g";
+	else {
+		if (!file_obj.raw_current.includes(":g")) {
+			file_obj.raw_current = ":g";
+			file_obj.raw_requested = ":g";
+		}
+		parseName(file_obj);
 	}
 }
 

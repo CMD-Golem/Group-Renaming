@@ -4,34 +4,15 @@ async function renameGroup() {
 
 	if (selected == null) return;
 
-	// add enum to the end if it is not included
-	var group_name = document.getElementById("new_name").value;
-	var auto_added_enum = false;
-	if (!group_name.includes(":e")) {
-		group_name_mod = group_name + ":e";
-		auto_added_enum = true;
-	}
-	else group_name_mod = group_name;
-
-	// patch index and handle leading zeros
-	var index_str = document.getElementById("starting_index").value || "1";
-	var leading_zeros = index_str.length;
-
-	var index_int = parseInt(index_str);
-	if (index_int <= 1) index_int = 0;
-	else index_int -= 1;
-
-	// handle enum variants
-	var enumeration = document.getElementById("enumeration").value;
-	var convertion = 0;
-
-	if (enumeration == "big_letters") convertion = 65;
-	else if (enumeration == "small_letters") convertion = 97;
-
 	// store new group data
+	var group_name = document.getElementById("new_name").value;
+	var index_str = document.getElementById("starting_index").value;
+	var enumeration = document.getElementById("enumeration").value;
+
 	selected.setAttribute("data-new_name", group_name);
 	selected.setAttribute("data-enumeration", enumeration);
 	selected.setAttribute("data-index", index_str);
+
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
 	orderBookmarkName();
 
@@ -40,27 +21,10 @@ async function renameGroup() {
 	unsaved_changes = true;
 
 	for (var i = 0; i < files.length; i++) {
-		// add leading zeros
-		if (convertion == 0 && leading_zeros != 0) var enum_char = (i + 1 + index_int).toString().padStart(leading_zeros, "0");
-		// increase custom enums
-		else if (convertion != 0) {
-			var loop = i + 1 + index_int;
-			var enum_char = "";
-			while (loop > 0) {
-				loop--;
-				enum_char = String.fromCharCode(convertion + (loop % 26)) + enum_char;
-				loop = Math.floor(loop / 26);
-			}
-		}
-		// nummerical
-		else var enum_char = i + 1 + index_int;
-
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
-		file_obj.enumeration = enum_char;
-		file_obj.group = group_name_mod;
-		file_obj.auto_added_enum = auto_added_enum;
+		file_obj.position = i;
 		needs_check.push(file_obj);
-		parseName(file_obj);
+		parseName(file_obj, selected, {group_name, index_str, enumeration});
 	}
 
 	for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
@@ -80,9 +44,12 @@ function startRenameManuall() {
 	input.innerHTML = file_obj.raw_current;
 	input.focus();
 
+	var range = document.createRange();
+	range.selectNodeContents(input);
+	range.collapse(false);
 	var sel = window.getSelection();
 	sel.removeAllRanges();
-	sel.selectAllChildren(input);
+	sel.addRange(range);
 
 	input.addEventListener("blur", renameManuall);
 	input.addEventListener("keydown", renameManuall);
@@ -90,16 +57,19 @@ function startRenameManuall() {
 }
 
 async function renameManuall(e) {
+	console.log(e.type);
 	if (e.type == "blur" || (e.type == "keydown" && e.key == "Enter")) {
 		var needs_check = [];
 		var needs_update = [];
 		unsaved_changes = true;
 
-		var selected = document.querySelectorAll(".selected_element");
+		var input = e.target.innerHTML.replace(/\n/g, '');
+		if (!input.includes(":g")) var selected = [contextmenu_selected];
+		else var selected = document.querySelectorAll(".selected_element");
 
 		for (var i = 0; i < selected.length; i++) {	
 			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
-			file_obj.raw_requested = e.target.innerHTML.replace(/\n/g, '');
+			file_obj.raw_requested = input;
 
 			needs_check.push(file_obj);
 			parseName(file_obj);
@@ -119,16 +89,57 @@ async function renameManuall(e) {
 	started_manuall_renaming = false;
 }
 
-function parseName(file_obj) {
-	// remove auto added enum if enum was manually added
+function parseName(file_obj, group, payload) {
+	if (file_obj.position == undefined) {
+		// reload position of files in group when needed
+		if (group == undefined) group = document.getElementById(file_obj.id).parentElement;
+		for (var i = 0; i < group.children.length; i++) {
+			var file = group.children[i];
+			current_file_names[file.id.replace("file_", "")].position = i;
+		}
+	}
+
 	var group_name = file_obj.group;
-	if (file_obj.auto_added_enum && file_obj.raw_requested.includes(":e")) group_name = group_name.slice(0,-2);
+	if (group_name == "" || payload != undefined) {
+		// get input data when needed and not provided
+		if (payload == undefined) {
+			var payload = {};
+			payload.group_name = document.getElementById("new_name").value;
+			payload.index_str = document.getElementById("starting_index").value;
+			payload.enumeration = document.getElementById("enumeration").value;
+		}
+
+		group_name = payload.group_name;
+		file_obj.group = group_name;
+		file_obj.leading_zeros = payload.index_str.length;
+
+		file_obj.start_index = parseInt(payload.index_str) || 1;
+		if (file_obj.start_index < 0) file_obj.start_index = 1;
+
+		if (payload.enumeration == "big_letters") file_obj.convertion = 65;
+		else if (payload.enumeration == "small_letters") file_obj.convertion = 97;
+		else file_obj.convertion = 0;
+	}
+	if (!group_name.includes(":e") && !file_obj.raw_requested.includes(":e")) group_name += ":e";
+
+	// enumeration
+	var index = file_obj.start_index + file_obj.position;
+	if (file_obj.convertion == 0) var enum_char = index.toString().padStart(file_obj.leading_zeros, "0");
+
+	else if (file_obj.convertion != 0) {
+		var enum_char = "";
+		while (index > 0) {
+			index--;
+			enum_char = String.fromCharCode(file_obj.convertion + (index % 26)) + enum_char;
+			index = Math.floor(index / 26);
+		}
+	}
 
 	// fill data
 	file_obj.requested = file_obj.raw_requested
 		.replace(":g", group_name)
 		.replaceAll(":n", file_obj.original)
-		.replaceAll(":e", file_obj.enumeration)
+		.replaceAll(":e", enum_char)
 		.replaceAll(/[\\\/:*?"<>|]/g, "");
 
 	// readd file extension
