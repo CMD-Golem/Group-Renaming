@@ -30,6 +30,7 @@ const translations = {
 	renaming_with_problems: "Dateien wurden umbenannt<br>Folgende Dateien konnten nicht umbenannt werden:",
 	config_stored: "Die Konfiguration wurde erfolgreich gespeichert",
 	config_restored: "Die Konfiguration wurde erfolgreich wiederhergestellt",
+	select_group: "Es wurde keine Gruppe ausgewählt"
 }
 
 function globalInit() {

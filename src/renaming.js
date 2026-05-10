@@ -1,8 +1,13 @@
 async function renameGroup() {
 	var selected = document.querySelector(".selected_container");
-	var files = selected.getElementsByTagName("file");
+	
+	if (selected == null) {
+		dialog.innerHTML = `<p>${translations.select_group}</p><button onclick="dialog.close()">Ok</button>`;
+		dialog.showModal();
+		return;
+	}
 
-	if (selected == null) return;
+	var files = selected.getElementsByTagName("file");
 
 	// store new group data
 	var group_name = document.getElementById("new_name").value;
@@ -16,77 +21,22 @@ async function renameGroup() {
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
 	orderBookmarkName();
 
-	var needs_check = [];
-	var needs_update = [];
+	var needs_check = new Set();
 	unsaved_changes = true;
 
 	for (var i = 0; i < files.length; i++) {
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
 		file_obj.position = i;
-		needs_check.push(file_obj);
+		needs_check.add(file_obj);
 		parseName(file_obj, selected, {group_name, index_str, enumeration});
 	}
 
-	for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
-	for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
+	processRenaming(needs_check);
 }
 
 function copyOriginalName() {
 	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
 	navigator.clipboard.writeText(file_obj.original);
-}
-
-function startRenameManuall() {
-	var input = contextmenu_selected.querySelector("text");
-	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
-	started_manuall_renaming = true;
-	input.contentEditable = true;
-	input.innerHTML = file_obj.raw_current;
-	input.focus();
-
-	var range = document.createRange();
-	range.selectNodeContents(input);
-	range.collapse(false);
-	var sel = window.getSelection();
-	sel.removeAllRanges();
-	sel.addRange(range);
-
-	input.addEventListener("blur", renameManuall);
-	input.addEventListener("keydown", renameManuall);
-	input.addEventListener("paste", noFormatting);
-}
-
-async function renameManuall(e) {
-	console.log(e.type);
-	if (e.type == "blur" || (e.type == "keydown" && e.key == "Enter")) {
-		var needs_check = [];
-		var needs_update = [];
-		unsaved_changes = true;
-
-		var input = e.target.innerHTML.replace(/\n/g, '');
-		if (!input.includes(":g")) var selected = [contextmenu_selected];
-		else var selected = document.querySelectorAll(".selected_element");
-
-		for (var i = 0; i < selected.length; i++) {	
-			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
-			file_obj.raw_requested = input;
-
-			needs_check.push(file_obj);
-			parseName(file_obj);
-		}
-		for (var i = 0; i < needs_check.length; i++) await checkNewName(needs_check[i], needs_update);
-		for (var i = 0; i < needs_update.length; i++) updateHtml(needs_update[i]);
-	}
-	else if (e.type == "keydown" && e.key == "Escape") e.target.innerHTML = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
-	else return;
-
-	// disable editing
-	e.target.removeEventListener("blur", renameManuall);
-	e.target.removeEventListener("keydown", renameManuall);
-	e.target.removeEventListener("paste", noFormatting);
-	e.target.blur();
-	e.target.contentEditable = false;
-	started_manuall_renaming = false;
 }
 
 function parseName(file_obj, group, payload) {
@@ -148,19 +98,111 @@ function parseName(file_obj, group, payload) {
 	}
 }
 
-async function checkNewName(file_obj, needs_update) {
-	var requested = file_obj.requested.toUpperCase();
-	var duplicate = current_file_names.find(obj => obj.requested.toUpperCase() == requested && obj.id != file_obj.id);
+function startRenameManuall() {
+	var input = contextmenu_selected.querySelector("text");
+	var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
+	started_manuall_renaming = true;
+	input.contentEditable = true;
+	input.innerHTML = file_obj.raw_current;
+	input.focus();
 
-	if (duplicate != undefined) await handleDuplicate(file_obj, duplicate, needs_update);
-	else {
-		file_obj.current = file_obj.requested;
-		file_obj.raw_current = file_obj.raw_requested;
-		needs_update.push(file_obj);
-	}
+	var range = document.createRange();
+	range.selectNodeContents(input);
+	range.collapse(false);
+	var sel = window.getSelection();
+	sel.removeAllRanges();
+	sel.addRange(range);
+
+	input.addEventListener("blur", renameManuall);
+	input.addEventListener("keydown", renameManuall);
+	input.addEventListener("paste", noFormatting);
 }
 
-async function handleDuplicate(wants_rename, duplicate, needs_update) {
+function renameManuall(e) {
+	if (e.type == "blur" || (e.type == "keydown" && e.key == "Enter")) {
+		var needs_check = new Set();
+		unsaved_changes = true;
+
+		var input = e.target.innerHTML.replace(/\n/g, '');
+		if (!input.includes(":g")) var selected = [contextmenu_selected];
+		else var selected = document.querySelectorAll(".selected_element:not(.duplication_selection_file)");
+
+		for (var i = 0; i < selected.length; i++) {
+			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
+			file_obj.raw_requested = input;
+			needs_check.add(file_obj);
+			parseName(file_obj);
+		}
+		processRenaming(needs_check);
+	}
+	else if (e.type == "keydown" && e.key == "Escape") e.target.innerHTML = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
+	else return;
+
+	// disable editing
+	e.target.removeEventListener("blur", renameManuall);
+	e.target.removeEventListener("keydown", renameManuall);
+	e.target.removeEventListener("paste", noFormatting);
+	e.target.blur();
+	e.target.contentEditable = false;
+}
+
+async function processRenaming(needs_check) {
+	var found_duplicate = true;
+
+	while (found_duplicate) {
+		found_duplicate = false;
+		for (var file_obj of needs_check) {
+			var requested = file_obj.requested.toUpperCase();
+			var duplicate = current_file_names.find(obj => obj.requested.toUpperCase() == requested && obj.id != file_obj.id);
+
+			if (duplicate) {
+				needs_check.add(await handleDuplicate(file_obj, duplicate));
+				found_duplicate = true;
+				break;
+			}
+		}
+	}
+
+	// update html
+	var reparse_position = new Set();
+
+	for (var file_obj of needs_check) {
+		file_obj.current = file_obj.requested;
+		file_obj.raw_current = file_obj.raw_requested;
+
+		var el_changed = document.getElementById(file_obj.id);
+		var group = el_changed.closest("group");
+		el_changed.querySelector("text").innerHTML = file_obj.current;
+
+		// remove from group if it doesnt contain :g in name
+		if (group.id != "default_group" && !file_obj.raw_current.includes(":g")) {
+			el_changed.remove();
+			default_group.appendChild(el_changed);
+			reparse_position.add(group);
+		}
+	}
+
+	// check again when some elements got removed from group
+	if (reparse_position.size > 0) {
+		var changed_position = new Set();
+
+		for (var group of reparse_position) {
+			for (var i = 0; i < group.children.length; i++) {
+				var file_obj = current_file_names[group.children[i].id.replace("file_", "")];
+				file_obj.position = i;
+				changed_position.add(file_obj);
+				parseName(file_obj);
+			}
+		}
+
+		await processRenaming(changed_position);
+	}
+
+	dialog.close();
+	started_manuall_renaming = false;
+}
+
+async function handleDuplicate(wants_rename, duplicate) {
 	return await new Promise(async (resolve) => {
 		dialog.innerHTML = `
 			<h1>${translations.duplicate_title}</h1>
@@ -171,11 +213,11 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 		`;
 
 		var selected_obj = undefined;
-		var keep_obj = undefined;
 
 		// let user select which file to rename
-		function createClone(file_obj, other_obj) {
+		function createClone(file_obj) {
 			var clone = document.getElementById(file_obj.id).cloneNode(true);
+			clone.classList.add("duplication_selection_file");
 			clone.draggable = false;
 			clone.id = "";
 
@@ -189,28 +231,25 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 				input.select();
 
 				selected_obj = file_obj;
-				keep_obj = other_obj;
 			});
 
 			dialog.querySelector("div").appendChild(clone);
 		}
 
-		createClone(wants_rename, duplicate);
-		createClone(duplicate, wants_rename);
+		createClone(wants_rename);
+		createClone(duplicate);
 
 		// confirm button
 		var button = document.createElement("button");
 		button.innerHTML = translations.duplicate_3;
-		await button.addEventListener("click", async () => {
+		button.addEventListener("click", async () => {
 			var raw_requested = document.getElementById("dialog_input").value;
 			if (selected_obj == undefined || raw_requested == "") return;
-			selected_obj.raw_requested = raw_requested;
+			// dialog.close();
 
-			dialog.close();
+			selected_obj.raw_requested = raw_requested;
 			parseName(selected_obj);
-			await checkNewName(selected_obj, needs_update);
-			await checkNewName(keep_obj, needs_update);
-			resolve();
+			resolve(selected_obj);
 		});
 
 		dialog.appendChild(button);
@@ -219,15 +258,7 @@ async function handleDuplicate(wants_rename, duplicate, needs_update) {
 }
 
 function updateHtml(file_obj) {
-	var el_changed = document.getElementById(file_obj.id);
-	el_changed.querySelector("text").innerHTML = file_obj.current;
-
-	// remove from group if it doesnt contain :g in name
-	if (el_changed.closest("group").id != "default_group" && !file_obj.raw_current.includes(":g")) {
-		el_changed.remove();
-		default_group.appendChild(el_changed);
-		renameGroup();
-	}
+	console.log("updateHtml")
 }
 
 async function applyFileNames() {
