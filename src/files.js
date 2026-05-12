@@ -67,11 +67,7 @@ function loadFiles(files) {
 			raw_requested: ":g",
 			requested: file_name,
 			group: "",
-			leading_zeros: 0,
-			start_index: 1,
-			convertion: 0,
-			position: undefined,
-			// enumeration: "",
+			enumeration: "",
 			// auto_added_enum: false,
 			modified_date: files[i].date,
 		});

@@ -1,4 +1,4 @@
-async function renameGroup() {
+function renameGroup() {
 	var selected = document.querySelector(".selected_container");
 	
 	if (selected == null) {
@@ -18,6 +18,10 @@ async function renameGroup() {
 	selected.setAttribute("data-enumeration", enumeration);
 	selected.setAttribute("data-index", index_str);
 
+	if (enumeration == "big_letters") convertion = 65;
+	else if (enumeration == "small_letters") convertion = 97;
+	else convertion = 0;
+
 	document.getElementById("bookmark_" + selected.id).innerHTML = group_name;
 	orderBookmarkName();
 
@@ -26,9 +30,25 @@ async function renameGroup() {
 
 	for (var i = 0; i < files.length; i++) {
 		var file_obj = current_file_names[files[i].id.replace("file_", "")];
-		file_obj.position = i;
+
+		var parsed_index = parseInt(index_str);
+		var index = (Number.isNaN(parsed_index) ? 1 : parsed_index) + i;
+
+		if (convertion == 0) var enum_char = index.toString().padStart(index_str.length, "0");
+		else {
+			var enum_char = "";
+			while (index > 0) {
+				index--;
+				enum_char = String.fromCharCode(convertion + (index % 26)) + enum_char;
+				index = Math.floor(index / 26);
+			}
+		}
+
+		file_obj.enumeration = enum_char;
+		file_obj.group = group_name;
+
 		needs_check.add(file_obj);
-		parseName(file_obj, selected, {group_name, index_str, enumeration});
+		parseName(file_obj);
 	}
 
 	processRenaming(needs_check);
@@ -39,57 +59,15 @@ function copyOriginalName() {
 	navigator.clipboard.writeText(file_obj.original);
 }
 
-function parseName(file_obj, group, payload) {
-	if (file_obj.position == undefined) {
-		// reload position of files in group when needed
-		if (group == undefined) group = document.getElementById(file_obj.id).parentElement;
-		for (var i = 0; i < group.children.length; i++) {
-			var file = group.children[i];
-			current_file_names[file.id.replace("file_", "")].position = i;
-		}
-	}
-
+function parseName(file_obj) {
 	var group_name = file_obj.group;
-	if (group_name == "" || payload != undefined) {
-		// get input data when needed and not provided
-		if (payload == undefined) {
-			var payload = {};
-			payload.group_name = document.getElementById("new_name").value;
-			payload.index_str = document.getElementById("starting_index").value;
-			payload.enumeration = document.getElementById("enumeration").value;
-		}
-
-		group_name = payload.group_name;
-		file_obj.group = group_name;
-		file_obj.leading_zeros = payload.index_str.length;
-
-		file_obj.start_index = parseInt(payload.index_str) || 1;
-		if (file_obj.start_index < 0) file_obj.start_index = 1;
-
-		if (payload.enumeration == "big_letters") file_obj.convertion = 65;
-		else if (payload.enumeration == "small_letters") file_obj.convertion = 97;
-		else file_obj.convertion = 0;
-	}
-	if (!group_name.includes(":e") && !file_obj.raw_requested.includes(":e")) group_name += ":e";
-
-	// enumeration
-	var index = file_obj.start_index + file_obj.position;
-	if (file_obj.convertion == 0) var enum_char = index.toString().padStart(file_obj.leading_zeros, "0");
-
-	else if (file_obj.convertion != 0) {
-		var enum_char = "";
-		while (index > 0) {
-			index--;
-			enum_char = String.fromCharCode(file_obj.convertion + (index % 26)) + enum_char;
-			index = Math.floor(index / 26);
-		}
-	}
+	if (!group_name.includes(":e")) group_name += ":e";
 
 	// fill data
 	file_obj.requested = file_obj.raw_requested
 		.replace(":g", group_name)
 		.replaceAll(":n", file_obj.original)
-		.replaceAll(":e", enum_char)
+		.replaceAll(":e", file_obj.enumeration)
 		.replaceAll(/[\\\/:*?"<>|]/g, "");
 
 	// readd file extension
@@ -124,11 +102,20 @@ function renameManuall(e) {
 		unsaved_changes = true;
 
 		var input = e.target.innerHTML.replace(/\n/g, '');
+		console.log(input) // check why br gets added
 		if (!input.includes(":g")) var selected = [contextmenu_selected];
 		else var selected = document.querySelectorAll(".selected_element:not(.duplication_selection_file)");
 
+		var found_undefined_enum = false;
 		for (var i = 0; i < selected.length; i++) {
 			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
+
+			// handle if enum isnt set
+			// ToDo: Breaks when editing doesnt happen on first item of selection
+			if (found_undefined_enum && file_obj.enumeration == "") break;
+			else if (file_obj.enumeration == "") found_undefined_enum = true;
+
+			// request renaming
 			file_obj.raw_requested = input;
 			needs_check.add(file_obj);
 			parseName(file_obj);
@@ -144,28 +131,39 @@ function renameManuall(e) {
 	e.target.removeEventListener("paste", noFormatting);
 	e.target.blur();
 	e.target.contentEditable = false;
+	started_manuall_renaming = false;
 }
 
 async function processRenaming(needs_check) {
 	var found_duplicate = true;
+	var cancel_renaming = false;
 
 	while (found_duplicate) {
 		found_duplicate = false;
 		for (var file_obj of needs_check) {
+			console.log(file_obj);
+
+			if (cancel_renaming) {
+				// ToDo: Is not sufficient enough
+				file_obj.requested = file_obj.current;
+				continue;
+			}
+
+			// check for duplicates
 			var requested = file_obj.requested.toUpperCase();
 			var duplicate = current_file_names.find(obj => obj.requested.toUpperCase() == requested && obj.id != file_obj.id);
+			if (!duplicate) continue;
 
-			if (duplicate) {
-				needs_check.add(await handleDuplicate(file_obj, duplicate));
-				found_duplicate = true;
-				break;
-			}
+			var handling = await handleDuplicate(file_obj, duplicate);
+			if (handling.canceled) cancel_renaming = true;
+			else needs_check.add(handling.file_obj);
+			
+			found_duplicate = true;
+			break;
 		}
 	}
 
 	// update html
-	var reparse_position = new Set();
-
 	for (var file_obj of needs_check) {
 		file_obj.current = file_obj.requested;
 		file_obj.raw_current = file_obj.raw_requested;
@@ -178,32 +176,15 @@ async function processRenaming(needs_check) {
 		if (group.id != "default_group" && !file_obj.raw_current.includes(":g")) {
 			el_changed.remove();
 			default_group.appendChild(el_changed);
-			reparse_position.add(group);
 		}
-	}
-
-	// check again when some elements got removed from group
-	if (reparse_position.size > 0) {
-		var changed_position = new Set();
-
-		for (var group of reparse_position) {
-			for (var i = 0; i < group.children.length; i++) {
-				var file_obj = current_file_names[group.children[i].id.replace("file_", "")];
-				file_obj.position = i;
-				changed_position.add(file_obj);
-				parseName(file_obj);
-			}
-		}
-
-		await processRenaming(changed_position);
 	}
 
 	dialog.close();
-	started_manuall_renaming = false;
+	// started_manuall_renaming = false;
 }
 
 async function handleDuplicate(wants_rename, duplicate) {
-	return await new Promise(async (resolve) => {
+	return await new Promise((resolve) => {
 		dialog.innerHTML = `
 			<h1>${translations.duplicate_title}</h1>
 			<p>${translations.duplicate_1}</p>
@@ -218,6 +199,7 @@ async function handleDuplicate(wants_rename, duplicate) {
 		function createClone(file_obj) {
 			var clone = document.getElementById(file_obj.id).cloneNode(true);
 			clone.classList.add("duplication_selection_file");
+			clone.classList.remove("selected_element");
 			clone.draggable = false;
 			clone.id = "";
 
@@ -240,25 +222,30 @@ async function handleDuplicate(wants_rename, duplicate) {
 		createClone(duplicate);
 
 		// confirm button
-		var button = document.createElement("button");
-		button.innerHTML = translations.duplicate_3;
-		button.addEventListener("click", async () => {
+		var confirm = document.createElement("button");
+		confirm.innerHTML = translations.duplicate_3;
+		confirm.addEventListener("click", _ => {
 			var raw_requested = document.getElementById("dialog_input").value;
 			if (selected_obj == undefined || raw_requested == "") return;
 			// dialog.close();
 
 			selected_obj.raw_requested = raw_requested;
 			parseName(selected_obj);
-			resolve(selected_obj);
+			resolve({canceled:false, file_obj:selected_obj});
 		});
 
-		dialog.appendChild(button);
+		// cancel button
+		var cancel = document.createElement("button");
+		cancel.innerHTML = translations.duplicate_4;
+		cancel.addEventListener("click", _ => {
+			document.getElementById("dialog_input").value = wants_rename.current;
+			resolve({canceled:true});
+		});
+
+		dialog.appendChild(confirm);
+		dialog.appendChild(cancel);
 		dialog.showModal();
 	});
-}
-
-function updateHtml(file_obj) {
-	console.log("updateHtml")
 }
 
 async function applyFileNames() {

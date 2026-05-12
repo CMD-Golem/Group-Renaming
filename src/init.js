@@ -19,6 +19,7 @@ const translations = {
 	duplicate_1: "Wähle das Bild aus, das einen anderen Namen erhalten soll.",
 	duplicate_2: "Hier den neuen Namen eingeben. Wenn kein :g eingetragen ist, wird die Datei aus der Gruppe entfernt, sofern sie in einer ist.",
 	duplicate_3: "Neuer Name überprüfen",
+	duplicate_4: "Abbrechen",
 	duplicate_message: "Wähle das Bild aus, dass aus seiner Gruppe entfernt werden soll und wieder seinen originalen Namen erhalten soll.",
 	duplicate_standard: "Es befindet sich bereits eine Datei desselben Names an diesem Ort.<br>Geben Sie einen neuen Namen ein:",
 	new_group: "Neue Gruppe",

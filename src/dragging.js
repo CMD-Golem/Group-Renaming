@@ -104,13 +104,18 @@ function dragEnd(e) {
 
 function setDefaultNames(element, in_default_group) {
 	var file_obj = current_file_names[element.id.replace("file_", "")];
-	if (!in_default_group && !file_obj.raw_current.includes(":g")) {
-		file_obj.raw_current = ":g";
-		file_obj.raw_requested = ":g";
-	}
 
-	file_obj.position = undefined;
-	parseName(file_obj);
+	if (in_default_group) {
+		file_obj.enumeration = "";
+		file_obj.group = "";
+	}
+	else {
+		if (!file_obj.raw_current.includes(":g")) {
+			file_obj.raw_current = ":g";
+			file_obj.raw_requested = ":g";
+		}
+		parseName(file_obj);
+	}
 }
 
 async function dragOver(e) {
