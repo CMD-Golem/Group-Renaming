@@ -11,8 +11,8 @@ async function storeConfig() {
 		var el_files = groups[i].getElementsByTagName("file");
 
 		for (var j = 0; j < el_files.length; j++) {
-			let { original, raw_current, current, enumeration, auto_added_enum } = current_file_names[el_files[j].id.replace("file_", "")];
-			files.push({original, raw_current, current, enumeration, auto_added_enum});
+			let { original, raw_current, current, enumeration } = current_file_names[el_files[j].id.replace("file_", "")];
+			files.push({original, raw_current, current, enumeration});
 		}
 
 		config_array.push({name, enumeration, index, files});
@@ -43,13 +43,12 @@ function loadConfig(groups) {
 			var file_obj = current_file_names.find(obj => obj.original == file_data.original);
 			if (file_obj == undefined) continue;
 
-			file_obj.raw_current = file_data.raw_current;
-			file_obj.current = file_data.current;
-			file_obj.raw_requested = file_data.raw_current;
-			file_obj.requested = file_data.current;
-			file_obj.group = group_name;
-			file_obj.enumeration = file_data.enumeration;
-			file_obj.auto_added_enum = file_data.auto_added_enum;
+			file_obj.raw_current = file_data.raw_current || ":g";
+			file_obj.current = file_data.current || "";
+			file_obj.raw_requested = file_data.raw_current || ":g";
+			file_obj.requested = file_data.current || "";
+			file_obj.group = group_name || "";
+			file_obj.enumeration = file_data.enumeration || "";
 
 			var file_el = document.getElementById(file_obj.id);
 			file_el.remove();
@@ -59,7 +58,4 @@ function loadConfig(groups) {
 	}
 
 	orderBookmarkName();
-
-	// dialog.innerHTML = `<p>${translations.config_restored}</p><button onclick="dialog.close()">Ok</button>`;
-	// dialog.showModal();
 }

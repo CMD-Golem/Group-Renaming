@@ -68,7 +68,6 @@ function loadFiles(files) {
 			requested: file_name,
 			group: "",
 			enumeration: "",
-			// auto_added_enum: false,
 			modified_date: files[i].date,
 		});
 	}

@@ -87,8 +87,6 @@ function loadData(msg) {
 		return;
 	}
 
-	console.log(object);
-
 	cleanUp();
 	file_path = object.dir;
 	

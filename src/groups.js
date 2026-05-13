@@ -73,20 +73,20 @@ function orderBookmarkName() {
 
 function orderGroupDate() {
 	var selected = document.querySelector(".selected_container");
+
+	if (selected == null) {
+		dialog.innerHTML = `<p>${translations.select_group}</p><button onclick="dialog.close()">Ok</button>`;
+		dialog.showModal();
+		return;
+	}
+
 	var files = Array.from(selected.getElementsByTagName("file"));
-
-	console.log(files)
-
-	if (selected == null) return;
-
 	files.sort((a, b) => {
 		var a_date = current_file_names[a.id.replace("file_", "")].modified_date;
 		var b_date = current_file_names[b.id.replace("file_", "")].modified_date;
 
 		return a_date - b_date;
 	});
-
-	console.log(files)
 
 	for (var i = 0; i < files.length; i++) selected.appendChild(files[i]);
 }

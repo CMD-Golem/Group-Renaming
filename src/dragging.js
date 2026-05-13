@@ -17,7 +17,7 @@ function dragStart(e) {
 	// show amount of selected elements
 	var selected = document.querySelectorAll(".selected_element:not(.dragging_clone)");
 	var amount = selected.length;
-	if (!target.classList.contains("selected_element")) amount += 1;
+	if (!target.classList.contains("selected_element")) amount = 0;
 	
 	if (amount > 1) {
 		dragging_amount = document.createElement("span");
@@ -31,7 +31,7 @@ function dragStart(e) {
 		target.classList.add("dragging");
 
 		// collect all selected elements
-		for (var i = 0; i < selected.length; i++) {
+		for (var i = 0; i < amount; i++) {
 			if (target.id != selected[i].id) {
 				selected_elements_list.push(selected[i]);
 				selected[i].remove();
@@ -108,13 +108,12 @@ function setDefaultNames(element, in_default_group) {
 	if (in_default_group) {
 		file_obj.enumeration = "";
 		file_obj.group = "";
+		file_obj.old_enumeration = "";
+		file_obj.old_group = "";
 	}
-	else {
-		if (!file_obj.raw_current.includes(":g")) {
-			file_obj.raw_current = ":g";
-			file_obj.raw_requested = ":g";
-		}
-		parseName(file_obj);
+	else if (!file_obj.raw_current.includes(":g")) {
+		file_obj.raw_current = ":g";
+		file_obj.raw_requested = ":g";
 	}
 }
 

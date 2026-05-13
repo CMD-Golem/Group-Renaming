@@ -102,24 +102,28 @@ function renameManuall(e) {
 		unsaved_changes = true;
 
 		var input = e.target.innerHTML.replace(/\n/g, '');
-		console.log(input) // check why br gets added
-		if (!input.includes(":g")) var selected = [contextmenu_selected];
-		else var selected = document.querySelectorAll(".selected_element:not(.duplication_selection_file)");
+		console.log(input) // ToDo: check why br gets added
 
-		var found_undefined_enum = false;
-		for (var i = 0; i < selected.length; i++) {
-			var file_obj = current_file_names[selected[i].id.replace("file_", "")];
+		// check if groupselection should be used and request renaming
+		var file_obj = current_file_names[contextmenu_selected.id.replace("file_", "")];
 
-			// handle if enum isnt set
-			// ToDo: Breaks when editing doesnt happen on first item of selection
-			if (found_undefined_enum && file_obj.enumeration == "") break;
-			else if (file_obj.enumeration == "") found_undefined_enum = true;
-
-			// request renaming
+		if (file_obj.enumeration == "" || !input.includes(":g")) {
 			file_obj.raw_requested = input;
 			needs_check.add(file_obj);
 			parseName(file_obj);
 		}
+		else {
+			var selected = document.querySelectorAll(".selected_element:not(.duplication_selection_file)");
+
+			for (var i = 0; i < selected.length; i++) {
+				var file_obj = current_file_names[selected[i].id.replace("file_", "")];
+
+				file_obj.raw_requested = input;
+				needs_check.add(file_obj);
+				parseName(file_obj);
+			}
+		}
+		
 		processRenaming(needs_check);
 	}
 	else if (e.type == "keydown" && e.key == "Escape") e.target.innerHTML = current_file_names[contextmenu_selected.id.replace("file_", "")].current;
@@ -141,10 +145,13 @@ async function processRenaming(needs_check) {
 	while (found_duplicate) {
 		found_duplicate = false;
 		for (var file_obj of needs_check) {
-			console.log(file_obj);
+			// console.log(file_obj);
 
 			if (cancel_renaming) {
-				// ToDo: Is not sufficient enough
+				console.log("cancel", file_obj.old_group, file_obj.group)
+				file_obj.enumeration = file_obj.old_enumeration || "";
+				file_obj.group = file_obj.old_group || "";
+				file_obj.raw_requested = file_obj.raw_current;
 				file_obj.requested = file_obj.current;
 				continue;
 			}
@@ -167,6 +174,8 @@ async function processRenaming(needs_check) {
 	for (var file_obj of needs_check) {
 		file_obj.current = file_obj.requested;
 		file_obj.raw_current = file_obj.raw_requested;
+		file_obj.old_enumeration = file_obj.enumeration;
+		file_obj.old_group = file_obj.group;
 
 		var el_changed = document.getElementById(file_obj.id);
 		var group = el_changed.closest("group");
@@ -188,9 +197,10 @@ async function handleDuplicate(wants_rename, duplicate) {
 		dialog.innerHTML = `
 			<h1>${translations.duplicate_title}</h1>
 			<p>${translations.duplicate_1}</p>
-			<div></div>
+			<div class="clone_box"></div>
 			<p>${translations.duplicate_2}</p>
 			<input id="dialog_input">
+			<div class="button_box"></div>
 		`;
 
 		var selected_obj = undefined;
@@ -215,7 +225,7 @@ async function handleDuplicate(wants_rename, duplicate) {
 				selected_obj = file_obj;
 			});
 
-			dialog.querySelector("div").appendChild(clone);
+			dialog.querySelector(".clone_box").appendChild(clone);
 		}
 
 		createClone(wants_rename);
@@ -224,10 +234,10 @@ async function handleDuplicate(wants_rename, duplicate) {
 		// confirm button
 		var confirm = document.createElement("button");
 		confirm.innerHTML = translations.duplicate_3;
+		confirm.style.flex = 2;
 		confirm.addEventListener("click", _ => {
 			var raw_requested = document.getElementById("dialog_input").value;
 			if (selected_obj == undefined || raw_requested == "") return;
-			// dialog.close();
 
 			selected_obj.raw_requested = raw_requested;
 			parseName(selected_obj);
@@ -237,13 +247,16 @@ async function handleDuplicate(wants_rename, duplicate) {
 		// cancel button
 		var cancel = document.createElement("button");
 		cancel.innerHTML = translations.duplicate_4;
+		cancel.style.flex = 1;
 		cancel.addEventListener("click", _ => {
 			document.getElementById("dialog_input").value = wants_rename.current;
 			resolve({canceled:true});
 		});
 
-		dialog.appendChild(confirm);
-		dialog.appendChild(cancel);
+		var button_box = dialog.querySelector(".button_box");
+		button_box.appendChild(confirm);
+		button_box.appendChild(cancel);
+
 		dialog.showModal();
 	});
 }
